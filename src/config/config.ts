@@ -5,6 +5,7 @@ export enum Settings {
 
 export interface IDefaults {
   PORT: number;
+  ROOT_PATH: string;
 }
 
 export interface IConfiguration {
@@ -15,6 +16,7 @@ export interface IConfiguration {
 export const Configuration: IConfiguration = {
   Defaults: {
     PORT: 3000,
+    ROOT_PATH: '/api/v1',
   },
   Settings,
 };

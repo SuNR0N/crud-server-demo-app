@@ -13,7 +13,13 @@ import {
   requestLogger,
 } from './util';
 
-const server = new InversifyExpressServer(container);
+const server = new InversifyExpressServer(
+  container,
+  null,
+  {
+    rootPath: Configuration.Defaults.ROOT_PATH,
+  },
+);
 server.setConfig((app) => {
   app.set(Configuration.Settings.PORT, process.env.PORT || Configuration.Defaults.PORT);
 

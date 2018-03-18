@@ -1,0 +1,150 @@
+openapi: 3.0.0
+servers:
+  - description: localhost
+    url: http://localhost:3000/api/v1
+info:
+  version: "1.0.0"
+  title: CRUD Server Demo Application API
+  contact:
+    email: annus.norbert@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: books
+    description: Books related calls
+paths:
+  /books:
+    get:
+      tags:
+        - books
+      summary: Get books
+      operationId: getBooks
+      description: |
+        Retrieves all the available books in the system
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IBook'
+    post:
+      tags:
+        - books
+      summary: Create new book
+      operationId: createBook
+      description: |
+        Creates a new book in the system
+      responses:
+        '201':
+          description: Book has been successfully created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: The resource URI of the created book
+        '400':
+          description: Validation failed
+        '409':
+          description: Book already exists with the given id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IBook'
+        description: Book item to create
+  /books/:id:
+    get:
+      tags:
+        - books
+      summary: Get book
+      operationId: getBook
+      description: |
+        Retrieves an existing book from the system
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Id of the book to retrieve
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IBook'
+        '404':
+          description: Book does not exist with the given id
+    delete:
+      tags:
+        - books
+      summary: Delete book
+      operationId: deleteBook
+      description: |
+        Removes an existing book from the system
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Id of the book to remove
+      responses:
+        '204':
+          description: Book has been successfully removed
+        '404':
+          description: Book does not exist with the given id      
+    patch:
+      tags:
+        - books
+      summary: Update book
+      operationId: updateBook
+      description: |
+        Updates an existing book in the system
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: Id of the book to update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IBookUpdate'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IBook'
+        '400':
+          description: Validation failed
+        '404':
+          description: Book does not exist with the given id
+components:
+  schemas:
+    IBookUpdate:
+      type: object
+      properties:
+        isbn:
+          type: string
+          example: 978-0553593716
+        title:
+          type: string
+          example: A Game of Thrones (A Song of Ice and Fire, Book 1)
+    IBook:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/IBookUpdate'
+      required:
+        - isbn
+        - title
