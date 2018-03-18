@@ -1,3 +1,8 @@
-./build
-./node_modules
-./*.log
+# Build
+build
+
+# Dependencies
+node_modules
+
+# Logs
+*.log
