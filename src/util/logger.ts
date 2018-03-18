@@ -43,7 +43,26 @@ if (process.env.NODE_ENV !== 'production') {
   logger.add(new transports.Console({
     format: format.combine(
       format.colorize(),
-      format.simple(),
+      format.timestamp({
+        format: 'YYYY-MM-DD HH:mm:ss',
+      }),
+      format.printf((log) => {
+        return `${log.timestamp} ${log.level}: ${log.message} ${log.meta ? JSON.stringify(log.meta) : ''}`;
+      }),
     ),
   }));
 }
+
+export const requestLogger: ILogger = createLogger({
+  format: format.combine(
+    format.colorize(),
+    format.timestamp({
+      format: 'YYYY-MM-DD HH:mm:ss',
+    }),
+    format.printf((log) => {
+      // tslint:disable:max-line-length
+      return `${log.timestamp} ${log.level}: HTTP ${log.res.statusCode} ${log.req.method} ${log.responseTime}ms ${log.req.url}`;
+    }),
+  ),
+  transports: [new transports.Console()],
+});

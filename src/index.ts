@@ -8,7 +8,10 @@ import {
   Configuration,
   container,
 } from './config';
-import { logger } from './util';
+import {
+  logger,
+  requestLogger,
+} from './util';
 
 const server = new InversifyExpressServer(container);
 server.setConfig((app) => {
@@ -19,7 +22,7 @@ server.setConfig((app) => {
   }));
   app.use(bodyParser.json());
   app.use(expressWinston.logger({
-    winstonInstance: logger,
+    winstonInstance: requestLogger,
   }));
 
   // Routes
