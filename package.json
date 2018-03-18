@@ -1,0 +1,61 @@
+{
+  "name": "crud-server-demo-app",
+  "version": "1.0.0",
+  "description": "CRUD Server Demo Application",
+  "main": "index.ts",
+  "author": "Norbert Annus",
+  "license": "MIT",
+  "keywords": [
+    "Docker",
+    "Express.js",
+    "InversifyJS",
+    "Jest",
+    "Node.js",
+    "PostgreSQL",
+    "Swagger",
+    "TypeScript",
+    "Winston"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "debug": "node -r ts-node/register --inspect=5858 src/index.ts",
+    "dev": "./node_modules/nodemon/bin/nodemon.js",
+    "lint": "tslint -p tsconfig.json",
+    "lint:fix": "tslint --fix -p tsconfig.json",
+    "start": "ts-node src/index.ts",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "express-winston": "^2.5.0",
+    "inversify": "^4.11.1",
+    "inversify-express-utils": "^5.2.1",
+    "reflect-metadata": "^0.1.12",
+    "winston": "^3.0.0-rc3"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.16.8",
+    "@types/express": "^4.11.1",
+    "@types/jest": "^22.2.0",
+    "jest": "^22.4.2",
+    "nodemon": "^1.17.1",
+    "ts-jest": "^22.4.1",
+    "ts-node": "^5.0.1",
+    "tslint": "^5.9.1",
+    "typescript": "^2.7.2"
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    },
+    "testRegex": "(/__tests__/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ]
+  }
+}
