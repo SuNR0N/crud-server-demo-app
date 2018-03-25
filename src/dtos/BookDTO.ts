@@ -1,9 +1,9 @@
 import {
-  Author,
   Book,
   Category,
   Publisher,
 } from '../entities';
+import { fullNameMapper } from './AuthorDTO';
 
 export interface IBookDTO {
   authors: string[];
@@ -16,16 +16,6 @@ export interface IBookDTO {
   title: string | null;
 }
 
-const authorMapper = (author: Author): string => {
-  const name: string[] = [];
-  name.push(author.first_name);
-  if (author.middle_name) {
-    name.push(author.middle_name);
-  }
-  name.push(author.last_name);
-  return name.join(' ');
-};
-
 const categoryMapper = (category: Category): string => {
   return category.name;
 };
@@ -37,7 +27,7 @@ const publisherMapper = (publisher: Publisher): string => {
 export class BookDTO implements IBookDTO {
   public static toDTO(entity: Book): BookDTO {
     const data: IBookDTO = {
-      authors: (entity.authors || []).map(authorMapper),
+      authors: (entity.authors || []).map(fullNameMapper),
       categories: (entity.categories || []).map(categoryMapper),
       id: entity.id,
       isbn10: entity.isbn10,

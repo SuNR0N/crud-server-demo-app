@@ -14,6 +14,7 @@ import {
 import { TYPES } from '../constants/types';
 import {
   BookDTO,
+  BookUpdateDTO,
   NewBookDTO,
 } from '../dtos';
 import { BookService } from '../services/BookService';
@@ -22,7 +23,7 @@ export interface IBookController {
   getBooks(): Promise<BookDTO[]>;
   getBook(id: number, res: Response): Promise<BookDTO | undefined>;
   createBook(newBook: NewBookDTO): Promise<BookDTO>;
-  updateBook(updatedBook: Partial<BookDTO>, id: number): Promise<BookDTO | undefined>;
+  updateBook(id: number, bookUpdate: BookUpdateDTO): Promise<BookDTO | undefined>;
   deleteBook(id: number): Promise<void>;
 }
 
@@ -57,17 +58,17 @@ export class BookController implements IBookController {
   public async createBook(
     @requestBody() newBook: NewBookDTO,
   ): Promise<BookDTO> {
-    const book = await this.bookService.createBook(newBook);
-    return BookDTO.toDTO(book);
+    const createdBook = await this.bookService.createBook(newBook);
+    return BookDTO.toDTO(createdBook);
   }
 
   @httpPatch('/:id')
   public async updateBook(
-    @requestBody() updatedBook: Partial<BookDTO>,
     @requestParam('id') id: number,
+    @requestBody() bookUpdate: BookUpdateDTO,
   ): Promise<BookDTO | undefined> {
-    const book = await this.bookService.updateBook(id, updatedBook);
-    return BookDTO.toDTO(book);
+    const updatedBook = await this.bookService.updateBook(id, bookUpdate);
+    return BookDTO.toDTO(updatedBook);
   }
 
   @httpDelete('/:id')
