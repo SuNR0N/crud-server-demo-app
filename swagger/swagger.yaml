@@ -11,9 +11,129 @@ info:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 tags:
+  - name: authors
+    description: Authors related calls
   - name: books
     description: Books related calls
+  - name: categories
+    description: Categories related calls
+  - name: publishers
+    description: Publishers related calls
 paths:
+  /authors:
+    get:
+      tags:
+        - authors
+      summary: Get authors
+      operationId: getAuthors
+      description: |
+        Retrieves all the available authors in the system
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuthorDTO'
+    post:
+      tags:
+        - authors
+      summary: Create new author
+      operationId: createAuthor
+      description: |
+        Creates a new author in the system
+      responses:
+        '201':
+          description: Author has been successfully created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: The resource URI of the created author
+        '400':
+          description: Validation failed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAuthorDTO'
+        description: Properties of the new author to create
+  /authors/:id:
+    get:
+      tags:
+        - authors
+      summary: Get author
+      operationId: getAuthor
+      description: |
+        Retrieves an existing author from the system
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the author to retrieve
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorDTO'
+        '404':
+          description: Author does not exist with the given ID
+    delete:
+      tags:
+        - authors
+      summary: Delete author
+      operationId: deleteAuthor
+      description: |
+        Removes an existing author from the system
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the author to remove
+      responses:
+        '204':
+          description: Author has been successfully removed
+        '404':
+          description: Author does not exist with the given ID      
+    patch:
+      tags:
+        - authors
+      summary: Update author
+      operationId: updateAuthor
+      description: |
+        Updates an existing author in the system
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the author to update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorUpdateDTO'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthorDTO'
+        '400':
+          description: Validation failed
+        '404':
+          description: Author does not exist with the given ID
   /books:
     get:
       tags:
@@ -50,13 +170,13 @@ paths:
         '400':
           description: Validation failed
         '409':
-          description: Book already exists with the given id
+          description: Book already exists with the given ID
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/NewBookDTO'
-        description: Book item to create
+        description: Properties of the new book to create
   /books/:id:
     get:
       tags:
@@ -71,7 +191,7 @@ paths:
           schema:
             type: string
           required: true
-          description: Id of the book to retrieve
+          description: ID of the book to retrieve
       responses:
         '200':
           description: OK
@@ -80,7 +200,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/BookDTO'
         '404':
-          description: Book does not exist with the given id
+          description: Book does not exist with the given ID
     delete:
       tags:
         - books
@@ -94,12 +214,12 @@ paths:
           schema:
             type: string
           required: true
-          description: Id of the book to remove
+          description: ID of the book to remove
       responses:
         '204':
           description: Book has been successfully removed
         '404':
-          description: Book does not exist with the given id      
+          description: Book does not exist with the given ID      
     patch:
       tags:
         - books
@@ -113,7 +233,7 @@ paths:
           schema:
             type: string
           required: true
-          description: Id of the book to update
+          description: ID of the book to update
       requestBody:
         content:
           application/json:
@@ -129,30 +249,304 @@ paths:
         '400':
           description: Validation failed
         '404':
-          description: Book does not exist with the given id
+          description: Book does not exist with the given ID
+  /categories:
+    get:
+      tags:
+        - categories
+      summary: Get categories
+      operationId: getCategories
+      description: |
+        Retrieves all the available categories in the system
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryDTO'
+    post:
+      tags:
+        - categories
+      summary: Create new category
+      operationId: createCategory
+      description: |
+        Creates a new category in the system
+      responses:
+        '201':
+          description: Category has been successfully created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: The resource URI of the created category
+        '400':
+          description: Validation failed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdateDTO'
+        description: Properties of the new category to create
+  /categories/:id:
+    get:
+      tags:
+        - categories
+      summary: Get category
+      operationId: getCategory
+      description: |
+        Retrieves an existing category from the system
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the category to retrieve
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDTO'
+        '404':
+          description: Category does not exist with the given ID
+    delete:
+      tags:
+        - categories
+      summary: Delete category
+      operationId: deleteCategory
+      description: |
+        Removes an existing category from the system
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the category to remove
+      responses:
+        '204':
+          description: Category has been successfully removed
+        '404':
+          description: Category does not exist with the given ID      
+    put:
+      tags:
+        - categories
+      summary: Update category
+      operationId: updateCategory
+      description: |
+        Updates an existing category in the system
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the category to update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdateDTO'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDTO'
+        '400':
+          description: Validation failed
+        '404':
+          description: Category does not exist with the given ID        
+  /publishers:
+    get:
+      tags:
+        - publishers
+      summary: Get publishers
+      operationId: getPublishers
+      description: |
+        Retrieves all the available publishers in the system
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublisherDTO'
+    post:
+      tags:
+        - publishers
+      summary: Create new publisher
+      operationId: createPublisher
+      description: |
+        Creates a new publisher in the system
+      responses:
+        '201':
+          description: Publisher has been successfully created
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+              description: The resource URI of the created publisher
+        '400':
+          description: Validation failed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublisherUpdateDTO'
+        description: Properties of the new publisher to create
+  /publishers/:id:
+    get:
+      tags:
+        - publishers
+      summary: Get publisher
+      operationId: getPublisher
+      description: |
+        Retrieves an existing publisher from the system
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the publisher to retrieve
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublisherDTO'
+        '404':
+          description: Publisher does not exist with the given ID
+    delete:
+      tags:
+        - publishers
+      summary: Delete publisher
+      operationId: deletePublisher
+      description: |
+        Removes an existing publisher from the system
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the publisher to remove
+      responses:
+        '204':
+          description: Publisher has been successfully removed
+        '404':
+          description: Publisher does not exist with the given ID      
+    put:
+      tags:
+        - publishers
+      summary: Update publisher
+      operationId: updatePublisher
+      description: |
+        Updates an existing publisher in the system
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+          description: ID of the publisher to update
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublisherUpdateDTO'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublisherDTO'
+        '400':
+          description: Validation failed
+        '404':
+          description: Publisher does not exist with the given ID                
 components:
   schemas:
+    AuthorDTO:
+      type: object
+      required:
+        - firstName
+        - fullName
+        - id
+        - middleName
+        - lastName
+      properties:
+        firstName:
+          type: string
+          description: First name of the author
+          example: Gayle
+        fullName:
+          type: string
+          description: Full name of the author
+          example: Gayle Laakmann McDowell
+        id:
+          type: number
+          description: ID of the author
+          example: 13
+        middleName:
+          type: string
+          description: Middle name of the author
+          example: McDowell
+        lastName:
+          type: string
+          description: Last name of the author
+          example: Laakmann
+    AuthorUpdateDTO:
+      type: object
+      properties:
+        firstName:
+          type: string
+          description: First name of the author
+        middleName:
+          type: string
+          description: Middle name of the author
+        lastName:
+          type: string
+          description: Last name of the author
     BookDTO:
       type: object
       required:
+        - authors
+        - categories
         - id
+        - isbn10
         - isbn13
+        - publicationDate
+        - publishers
         - title
       properties:
         authors:
           type: array
           items:
             type: string
-            description: Full name of author
+            description: Full name of the author
             example: Gayle Laakmann McDowell
-          description: Authors of the book
+          description: Full names of authors of the book
         categories:
           type: array
           items:
             type: string
-            description: Category name
+            description: Name of the category
             example: Computers & Technology
-          description: Categories to which to book belongs to
+          description: Categories to which the book belongs to
         id:
           type: number
           description: ID of the book
@@ -182,12 +576,19 @@ components:
           example: 'Cracking the Coding Interview, 6th Edition: 189 Programming Questions and Solutions'
     BookUpdateDTO:
       type: object
-    NewBookDTO:
-      type: object
-      required:
-        - isbn13
-        - title
       properties:
+        authors:
+          type: array
+          items:
+            type: number
+            description: ID of author
+          description: IDs of authors of the book
+        categories:
+          type: array
+          items:
+            type: number
+            description: ID of category
+          description: IDs of categories of the book
         isbn10:
           type: string
           description: ISBN-10 of the book
@@ -197,6 +598,107 @@ components:
         publicationDate:
           type: string
           description: Publication date of the book
+        publishers:
+          type: array
+          items:
+            type: number
+            description: ID of publisher
+          description: IDs of publishers of the book
         title:
           type: string
           description: Title of the book
+    CategoryDTO:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: number
+          description: ID of the category
+          example: 8
+        name:
+          type: string
+          description: Name of the category
+          example: Computers & Technology
+    CategoryUpdateDTO:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: New name of the category
+    NewAuthorDTO:
+      type: object
+      required:
+        - firstName
+        - lastName
+      properties:
+        firstName:
+          type: string
+          description: First name of the author
+        middleName:
+          type: string
+          description: Middle name of the author
+        lastName:
+          type: string
+          description: Last name of the author
+    NewBookDTO:
+      type: object
+      required:
+        - isbn13
+        - title
+      properties:
+        authors:
+          type: array
+          items:
+            type: number
+            description: ID of author
+          description: IDs of authors of the book
+        categories:
+          type: array
+          items:
+            type: number
+            description: ID of category
+          description: IDs of categories of the book
+        isbn10:
+          type: string
+          description: ISBN-10 of the book
+        isbn13:
+          type: string
+          description: ISBN-13 of the book
+        publicationDate:
+          type: string
+          description: Publication date of the book
+        publishers:
+          type: array
+          items:
+            type: number
+            description: ID of publisher
+          description: IDs of publishers of the book
+        title:
+          type: string
+          description: Title of the book
+    PublisherDTO:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: number
+          description: ID of the publisher
+          example: 3
+        name:
+          type: string
+          description: Name of the publisher
+          example: CareerCup
+    PublisherUpdateDTO:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: New name of the publisher
