@@ -1,22 +1,13 @@
 export interface INewBookDTO {
-  title: string;
+  isbn10?: string;
   isbn13: string;
+  publicationDate?: string;
+  title: string;
 }
 
 export class NewBookDTO implements INewBookDTO {
-  private _isbn13: string;
-  private _title: string;
-
-  constructor(data: any = {}) {
-    this._isbn13 = data.isbn13;
-    this._title = data.title;
-  }
-
-  public get isbn13(): string {
-    return this._isbn13;
-  }
-
-  public get title(): string {
-    return this._title;
-  }
+  public isbn10?: string;
+  public isbn13!: string;
+  public publicationDate?: string;
+  public title!: string;
 }

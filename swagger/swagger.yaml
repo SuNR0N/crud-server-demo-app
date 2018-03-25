@@ -30,7 +30,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/IBook'
+                  $ref: '#/components/schemas/BookDTO'
     post:
       tags:
         - books
@@ -55,7 +55,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/IBook'
+              $ref: '#/components/schemas/NewBookDTO'
         description: Book item to create
   /books/:id:
     get:
@@ -78,7 +78,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IBook'
+                $ref: '#/components/schemas/BookDTO'
         '404':
           description: Book does not exist with the given id
     delete:
@@ -118,33 +118,85 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/IBookUpdate'
+              $ref: '#/components/schemas/BookUpdateDTO'
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IBook'
+                $ref: '#/components/schemas/BookDTO'
         '400':
           description: Validation failed
         '404':
           description: Book does not exist with the given id
 components:
   schemas:
-    IBookUpdate:
+    BookDTO:
       type: object
+      required:
+        - id
+        - isbn13
+        - title
       properties:
-        isbn:
+        authors:
+          type: array
+          items:
+            type: string
+            description: Full name of author
+            example: Gayle Laakmann McDowell
+          description: Authors of the book
+        categories:
+          type: array
+          items:
+            type: string
+            description: Category name
+            example: Computers & Technology
+          description: Categories to which to book belongs to
+        id:
+          type: number
+          description: ID of the book
+          example: 6
+        isbn10:
           type: string
-          example: 978-0553593716
+          description: ISBN-10 of the book
+          example: 0984782850
+        isbn13:
+          type: string
+          description: ISBN-13 of the book
+          example: 9780984782857
+        publicationDate:
+          type: string
+          description: Publication date of the book
+          example: 2015-07-01
+        publishers:
+          type: array
+          items:
+            type: string
+            description: Publisher name
+            example: CareerCup
+          description: Publishers of the book
         title:
           type: string
-          example: A Game of Thrones (A Song of Ice and Fire, Book 1)
-    IBook:
+          description: Title of the book
+          example: 'Cracking the Coding Interview, 6th Edition: 189 Programming Questions and Solutions'
+    BookUpdateDTO:
       type: object
-      allOf:
-        - $ref: '#/components/schemas/IBookUpdate'
+    NewBookDTO:
+      type: object
       required:
-        - isbn
+        - isbn13
         - title
+      properties:
+        isbn10:
+          type: string
+          description: ISBN-10 of the book
+        isbn13:
+          type: string
+          description: ISBN-13 of the book
+        publicationDate:
+          type: string
+          description: Publication date of the book
+        title:
+          type: string
+          description: Title of the book

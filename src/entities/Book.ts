@@ -18,6 +18,7 @@ export class Book {
   @Column({
     length: 10,
     name: 'isbn_10',
+    nullable: true,
   })
   public isbn10!: string;
 
@@ -32,6 +33,7 @@ export class Book {
 
   @Column({
     name: 'publication_date',
+    nullable: true,
     type: 'date',
   })
   public publicationDate!: string;

@@ -1,4 +1,9 @@
-import { Book } from '../entities/Book';
+import {
+  Author,
+  Book,
+  Category,
+  Publisher,
+} from '../entities';
 
 export interface IBookDTO {
   authors: string[];
@@ -8,26 +13,38 @@ export interface IBookDTO {
   isbn13: string | null;
   publicationDate: string | null;
   publishers: string[];
+  title: string | null;
 }
+
+const authorMapper = (author: Author): string => {
+  const name: string[] = [];
+  name.push(author.first_name);
+  if (author.middle_name) {
+    name.push(author.middle_name);
+  }
+  name.push(author.last_name);
+  return name.join(' ');
+};
+
+const categoryMapper = (category: Category): string => {
+  return category.name;
+};
+
+const publisherMapper = (publisher: Publisher): string => {
+  return publisher.name;
+};
 
 export class BookDTO implements IBookDTO {
   public static toDTO(entity: Book): BookDTO {
     const data: IBookDTO = {
-      authors: entity.authors.map((author) => {
-        const name: string[] = [];
-        name.push(author.first_name);
-        if (author.middle_name) {
-          name.push(author.middle_name);
-        }
-        name.push(author.last_name);
-        return name.join(' ');
-      }),
-      categories: entity.categories.map((category) => category.name),
+      authors: (entity.authors || []).map(authorMapper),
+      categories: (entity.categories || []).map(categoryMapper),
       id: entity.id,
       isbn10: entity.isbn10,
       isbn13: entity.isbn13,
       publicationDate: entity.publicationDate,
-      publishers: entity.publishers.map((publisher) => publisher.name),
+      publishers: (entity.publishers || []).map(publisherMapper),
+      title: entity.title,
     };
     return new BookDTO(data);
   }
@@ -39,6 +56,7 @@ export class BookDTO implements IBookDTO {
   public isbn13: string | null;
   public publicationDate: string | null;
   public publishers: string[];
+  public title: string | null;
 
   constructor(data: IBookDTO = {
     authors: [],
@@ -48,6 +66,7 @@ export class BookDTO implements IBookDTO {
     isbn13: null,
     publicationDate: null,
     publishers: [],
+    title: null,
   }) {
     this.authors = data.authors;
     this.categories = data.categories;
@@ -56,5 +75,6 @@ export class BookDTO implements IBookDTO {
     this.isbn13 = data.isbn13;
     this.publicationDate = data.publicationDate;
     this.publishers = data.publishers;
+    this.title = data.title;
   }
 }

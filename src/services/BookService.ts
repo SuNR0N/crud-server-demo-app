@@ -32,7 +32,7 @@ export class BookService implements IBookService {
   }
 
   public deleteBook(id: number): Promise<void> {
-    return this.bookRepository.removeById(id);
+    return this.bookRepository.deleteById(id);
   }
 
   public getBook(id: number): Promise<Book | undefined> {
