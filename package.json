@@ -32,7 +32,9 @@
     "express-winston": "^2.5.0",
     "inversify": "^4.11.1",
     "inversify-express-utils": "^5.2.1",
+    "pg": "^7.4.1",
     "reflect-metadata": "^0.1.12",
+    "typeorm": "^0.1.16",
     "winston": "^3.0.0-rc3"
   },
   "devDependencies": {

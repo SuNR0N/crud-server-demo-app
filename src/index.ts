@@ -6,43 +6,46 @@ import { InversifyExpressServer } from 'inversify-express-utils';
 
 import {
   Configuration,
-  container,
+  bindings,
 } from './config';
 import {
   logger,
   requestLogger,
 } from './util';
+import { Container } from 'inversify';
 
-const server = new InversifyExpressServer(
-  container,
-  null,
-  {
-    rootPath: Configuration.Defaults.ROOT_PATH,
-  },
-);
-server.setConfig((app) => {
-  app.set(Configuration.Settings.PORT, process.env.PORT || Configuration.Defaults.PORT);
+(async () => {
 
-  app.use(bodyParser.urlencoded({
-    extended: true,
-  }));
-  app.use(bodyParser.json());
-  app.use(expressWinston.logger({
-    winstonInstance: requestLogger,
-  }));
+  const container = new Container();
+  await container.loadAsync(bindings);
+  const server = new InversifyExpressServer(
+    container,
+    null,
+    {
+      rootPath: Configuration.ROOT_PATH,
+    },
+  );
+  server.setConfig((app) => {
+    app.use(bodyParser.urlencoded({
+      extended: true,
+    }));
+    app.use(bodyParser.json());
+    app.use(expressWinston.logger({
+      winstonInstance: requestLogger,
+    }));
 
-  // Routes
+    // Routes
 
-  app.use(expressWinston.errorLogger({
-    winstonInstance: logger,
-  }));
+    app.use(expressWinston.errorLogger({
+      winstonInstance: logger,
+    }));
 
-});
+  });
 
-const serverInstance = server.build();
+  const serverInstance = server.build();
 
-serverInstance.listen(serverInstance.get(Configuration.Settings.PORT), () => {
-  const port = serverInstance.get(Configuration.Settings.PORT);
-  const environment = serverInstance.get(Configuration.Settings.ENV);
-  logger.info(`Server is running at http://localhost:${port} in ${environment} mode`);
-});
+  serverInstance.listen(Configuration.PORT, () => {
+    logger.info(`Server is running at http://localhost:${Configuration.PORT} in ${Configuration.ENVIRONMENT} mode`);
+  });
+
+})();

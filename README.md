@@ -9,7 +9,7 @@ docker build -t my-postgres .
 
 Run the docker container:
 ```bash
-docker run --name test-db --env-file .env -d my-postgres
+docker run --name test-db --env-file .env -p 5432:5432 -d my-postgres
 ```
 
 Connect to the container via `psql`:
