@@ -1,9 +1,8 @@
-import { Response } from 'express';
 import {
-  getStatusText,
-  INTERNAL_SERVER_ERROR,
-  NOT_FOUND,
-} from 'http-status-codes';
+  Request,
+  Response,
+} from 'express';
+import { CREATED } from 'http-status-codes';
 import { inject } from 'inversify';
 import {
   controller,
@@ -11,6 +10,7 @@ import {
   httpGet,
   httpPatch,
   httpPost,
+  request,
   requestBody,
   requestParam,
   response,
@@ -24,13 +24,13 @@ import {
   INewAuthorDTO,
   NewAuthorDTO,
 } from '../dtos';
-import { EntityNotFoundError } from '../errors/EntityNotFoundError';
 import { AuthorService } from '../services/AuthorService';
+import { errorHandler } from '../util/errorHandler';
 
 export interface IAuthorController {
   getAuthors(): Promise<AuthorDTO[]>;
   getAuthor(id: number, res: Response): Promise<AuthorDTO | undefined>;
-  createAuthor(newAuthor: INewAuthorDTO): Promise<AuthorDTO>;
+  createAuthor(newAuthor: INewAuthorDTO, req: Request, res: Response): Promise<void>;
   updateAuthor(id: number, authorUpdate: IAuthorUpdateDTO, res: Response): Promise<AuthorDTO | undefined>;
   deleteAuthor(id: number, res: Response): Promise<void>;
 }
@@ -57,22 +57,19 @@ export class AuthorController implements IAuthorController {
       const author = await this.authorService.getAuthor(id);
       return AuthorDTO.toDTO(author);
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        res.status(NOT_FOUND);
-        res.send(error.message);
-      } else {
-        res.status(INTERNAL_SERVER_ERROR);
-        res.send(getStatusText(INTERNAL_SERVER_ERROR));
-      }
+      errorHandler(error, res);
     }
   }
 
   @httpPost('/')
   public async createAuthor(
     @requestBody() newAuthor: INewAuthorDTO,
-  ): Promise<AuthorDTO> {
+    @request() req: Request,
+    @response() res: Response,
+  ): Promise<void> {
     const createdAuthor = await this.authorService.createAuthor(new NewAuthorDTO(newAuthor));
-    return AuthorDTO.toDTO(createdAuthor);
+    res.location(`${req.originalUrl}/${createdAuthor.id}`);
+    res.sendStatus(CREATED);
   }
 
   @httpPatch('/:id')
@@ -85,13 +82,7 @@ export class AuthorController implements IAuthorController {
       const updatedAuthor = await this.authorService.updateAuthor(id, new AuthorUpdateDTO(authorUpdate));
       return AuthorDTO.toDTO(updatedAuthor);
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        res.status(NOT_FOUND);
-        res.send(error.message);
-      } else {
-        res.status(INTERNAL_SERVER_ERROR);
-        res.send(getStatusText(INTERNAL_SERVER_ERROR));
-      }
+      errorHandler(error, res);
     }
   }
 
@@ -103,13 +94,7 @@ export class AuthorController implements IAuthorController {
     try {
       return await this.authorService.deleteAuthor(id);
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        res.status(NOT_FOUND);
-        res.send(error.message);
-      } else {
-        res.status(INTERNAL_SERVER_ERROR);
-        res.send(getStatusText(INTERNAL_SERVER_ERROR));
-      }
+      errorHandler(error, res);
     }
   }
 }

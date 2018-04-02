@@ -1,9 +1,8 @@
-import { Response } from 'express';
 import {
-  getStatusText,
-  INTERNAL_SERVER_ERROR,
-  NOT_FOUND,
-} from 'http-status-codes';
+  Request,
+  Response,
+} from 'express';
+import { CREATED } from 'http-status-codes';
 import { inject } from 'inversify';
 import {
   controller,
@@ -11,6 +10,7 @@ import {
   httpGet,
   httpPost,
   httpPut,
+  request,
   requestBody,
   requestParam,
   response,
@@ -22,13 +22,13 @@ import {
   CategoryUpdateDTO,
   ICategoryUpdateDTO,
 } from '../dtos';
-import { EntityNotFoundError } from '../errors/EntityNotFoundError';
 import { CategoryService } from '../services/CategoryService';
+import { errorHandler } from '../util/errorHandler';
 
 export interface ICategoryController {
   getCategories(): Promise<CategoryDTO[]>;
   getCategory(id: number, res: Response): Promise<CategoryDTO | undefined>;
-  createCategory(newCategory: ICategoryUpdateDTO): Promise<CategoryDTO>;
+  createCategory(newCategory: ICategoryUpdateDTO, req: Request, res: Response): Promise<void>;
   updateCategory(id: number, categoryUpdate: ICategoryUpdateDTO, res: Response): Promise<CategoryDTO | undefined>;
   deleteCategory(id: number, res: Response): Promise<void>;
 }
@@ -55,22 +55,19 @@ export class CategoryController implements ICategoryController {
       const category = await this.categoryService.getCategory(id);
       return CategoryDTO.toDTO(category);
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        res.status(NOT_FOUND);
-        res.send(error.message);
-      } else {
-        res.status(INTERNAL_SERVER_ERROR);
-        res.send(getStatusText(INTERNAL_SERVER_ERROR));
-      }
+      errorHandler(error, res);
     }
   }
 
   @httpPost('/')
   public async createCategory(
     @requestBody() newCategory: ICategoryUpdateDTO,
-  ): Promise<CategoryDTO> {
+    @request() req: Request,
+    @response() res: Response,
+  ): Promise<void> {
     const createdCategory = await this.categoryService.createCategory(new CategoryUpdateDTO(newCategory));
-    return CategoryDTO.toDTO(createdCategory);
+    res.location(`${req.originalUrl}/${createdCategory.id}`);
+    res.sendStatus(CREATED);
   }
 
   @httpPut('/:id')
@@ -83,13 +80,7 @@ export class CategoryController implements ICategoryController {
       const updatedCategory = await this.categoryService.updateCategory(id, new CategoryUpdateDTO(categoryUpdate));
       return CategoryDTO.toDTO(updatedCategory);
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        res.status(NOT_FOUND);
-        res.send(error.message);
-      } else {
-        res.status(INTERNAL_SERVER_ERROR);
-        res.send(getStatusText(INTERNAL_SERVER_ERROR));
-      }
+      errorHandler(error, res);
     }
   }
 
@@ -101,13 +92,7 @@ export class CategoryController implements ICategoryController {
     try {
       return await this.categoryService.deleteCategory(id);
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        res.status(NOT_FOUND);
-        res.send(error.message);
-      } else {
-        res.status(INTERNAL_SERVER_ERROR);
-        res.send(getStatusText(INTERNAL_SERVER_ERROR));
-      }
+      errorHandler(error, res);
     }
   }
 }

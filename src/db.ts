@@ -35,7 +35,7 @@ export async function getDbConnection(): Promise<Connection> {
     host: Configuration.DATABASE_HOST,
     password: Configuration.DATABASE_PASSWORD,
     port: Configuration.DATABASE_PORT,
-    synchronize: true,
+    synchronize: false,
     type: 'postgres',
     username: Configuration.DATABASE_USER,
   });

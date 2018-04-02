@@ -52,7 +52,7 @@ paths:
               schema:
                 type: string
                 format: uri
-              description: The resource URI of the created author
+              description: The relative resource URI of the created author
         '400':
           description: Validation failed
       requestBody:
@@ -166,11 +166,11 @@ paths:
               schema:
                 type: string
                 format: uri
-              description: The resource URI of the created book
+              description: The relative resource URI of the created book
         '400':
           description: Validation failed
         '409':
-          description: Book already exists with the given ID
+          description: Book already exists with the given ISBN-13
       requestBody:
         content:
           application/json:
@@ -282,7 +282,7 @@ paths:
               schema:
                 type: string
                 format: uri
-              description: The resource URI of the created category
+              description: The relative resource URI of the created category
         '400':
           description: Validation failed
       requestBody:
@@ -396,7 +396,7 @@ paths:
               schema:
                 type: string
                 format: uri
-              description: The resource URI of the created publisher
+              description: The relative resource URI of the created publisher
         '400':
           description: Validation failed
       requestBody:

@@ -1,9 +1,8 @@
-import { Response } from 'express';
 import {
-  getStatusText,
-  INTERNAL_SERVER_ERROR,
-  NOT_FOUND,
-} from 'http-status-codes';
+  Request,
+  Response,
+} from 'express';
+import { CREATED } from 'http-status-codes';
 import { inject } from 'inversify';
 import {
   controller,
@@ -11,6 +10,7 @@ import {
   httpGet,
   httpPatch,
   httpPost,
+  request,
   requestBody,
   requestParam,
   response,
@@ -24,13 +24,13 @@ import {
   INewBookDTO,
   NewBookDTO,
 } from '../dtos';
-import { EntityNotFoundError } from '../errors';
 import { BookService } from '../services/BookService';
+import { errorHandler } from '../util/errorHandler';
 
 export interface IBookController {
   getBooks(): Promise<BookDTO[]>;
   getBook(id: number, res: Response): Promise<BookDTO | undefined>;
-  createBook(newBook: INewBookDTO): Promise<BookDTO>;
+  createBook(newBook: INewBookDTO, req: Request, res: Response): Promise<void>;
   updateBook(id: number, bookUpdate: IBookUpdateDTO, res: Response): Promise<BookDTO | undefined>;
   deleteBook(id: number, res: Response): Promise<void>;
 }
@@ -57,22 +57,19 @@ export class BookController implements IBookController {
       const book = await this.bookService.getBook(id);
       return BookDTO.toDTO(book);
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        res.status(NOT_FOUND);
-        res.send(error.message);
-      } else {
-        res.status(INTERNAL_SERVER_ERROR);
-        res.send(getStatusText(INTERNAL_SERVER_ERROR));
-      }
+      errorHandler(error, res);
     }
   }
 
   @httpPost('/')
   public async createBook(
     @requestBody() newBook: INewBookDTO,
-  ): Promise<BookDTO> {
+    @request() req: Request,
+    @response() res: Response,
+  ): Promise<void> {
     const createdBook = await this.bookService.createBook(new NewBookDTO(newBook));
-    return BookDTO.toDTO(createdBook);
+    res.location(`${req.originalUrl}/${createdBook.id}`);
+    res.sendStatus(CREATED);
   }
 
   @httpPatch('/:id')
@@ -85,13 +82,7 @@ export class BookController implements IBookController {
       const updatedBook = await this.bookService.updateBook(id, new BookUpdateDTO(bookUpdate));
       return BookDTO.toDTO(updatedBook);
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        res.status(NOT_FOUND);
-        res.send(error.message);
-      } else {
-        res.status(INTERNAL_SERVER_ERROR);
-        res.send(getStatusText(INTERNAL_SERVER_ERROR));
-      }
+      errorHandler(error, res);
     }
   }
 
@@ -103,13 +94,7 @@ export class BookController implements IBookController {
     try {
       return await this.bookService.deleteBook(id);
     } catch (error) {
-      if (error instanceof EntityNotFoundError) {
-        res.status(NOT_FOUND);
-        res.send(error.message);
-      } else {
-        res.status(INTERNAL_SERVER_ERROR);
-        res.send(getStatusText(INTERNAL_SERVER_ERROR));
-      }
+      errorHandler(error, res);
     }
   }
 }
