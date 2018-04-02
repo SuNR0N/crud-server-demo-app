@@ -1,4 +1,9 @@
 import { Response } from 'express';
+import {
+  getStatusText,
+  INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
+} from 'http-status-codes';
 import { inject } from 'inversify';
 import {
   controller,
@@ -15,16 +20,19 @@ import { TYPES } from '../constants/types';
 import {
   AuthorDTO,
   AuthorUpdateDTO,
+  IAuthorUpdateDTO,
+  INewAuthorDTO,
   NewAuthorDTO,
 } from '../dtos';
+import { EntityNotFoundError } from '../errors/EntityNotFoundError';
 import { AuthorService } from '../services/AuthorService';
 
 export interface IAuthorController {
   getAuthors(): Promise<AuthorDTO[]>;
   getAuthor(id: number, res: Response): Promise<AuthorDTO | undefined>;
-  createAuthor(newAuthor: NewAuthorDTO): Promise<AuthorDTO>;
-  updateAuthor(id: number, authorUpdate: AuthorUpdateDTO): Promise<AuthorDTO | undefined>;
-  deleteAuthor(id: number): Promise<void>;
+  createAuthor(newAuthor: INewAuthorDTO): Promise<AuthorDTO>;
+  updateAuthor(id: number, authorUpdate: IAuthorUpdateDTO, res: Response): Promise<AuthorDTO | undefined>;
+  deleteAuthor(id: number, res: Response): Promise<void>;
 }
 
 @controller('/authors')
@@ -45,36 +53,63 @@ export class AuthorController implements IAuthorController {
     @requestParam('id') id: number,
     @response() res: Response,
   ): Promise<AuthorDTO | undefined> {
-    const author = await this.authorService.getAuthor(id);
-    if (author) {
+    try {
+      const author = await this.authorService.getAuthor(id);
       return AuthorDTO.toDTO(author);
-    } else {
-      res.status(404);
-      res.send('Not Found');
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        res.status(NOT_FOUND);
+        res.send(error.message);
+      } else {
+        res.status(INTERNAL_SERVER_ERROR);
+        res.send(getStatusText(INTERNAL_SERVER_ERROR));
+      }
     }
   }
 
   @httpPost('/')
   public async createAuthor(
-    @requestBody() newAuthor: NewAuthorDTO,
+    @requestBody() newAuthor: INewAuthorDTO,
   ): Promise<AuthorDTO> {
-    const createdAuthor = await this.authorService.createAuthor(newAuthor);
+    const createdAuthor = await this.authorService.createAuthor(new NewAuthorDTO(newAuthor));
     return AuthorDTO.toDTO(createdAuthor);
   }
 
   @httpPatch('/:id')
   public async updateAuthor(
     @requestParam('id') id: number,
-    @requestBody() authorUpdate: AuthorUpdateDTO,
+    @requestBody() authorUpdate: IAuthorUpdateDTO,
+    @response() res: Response,
   ): Promise<AuthorDTO | undefined> {
-    const updatedAuthor = await this.authorService.updateAuthor(id, authorUpdate);
-    return AuthorDTO.toDTO(updatedAuthor);
+    try {
+      const updatedAuthor = await this.authorService.updateAuthor(id, new AuthorUpdateDTO(authorUpdate));
+      return AuthorDTO.toDTO(updatedAuthor);
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        res.status(NOT_FOUND);
+        res.send(error.message);
+      } else {
+        res.status(INTERNAL_SERVER_ERROR);
+        res.send(getStatusText(INTERNAL_SERVER_ERROR));
+      }
+    }
   }
 
   @httpDelete('/:id')
   public async deleteAuthor(
     @requestParam('id') id: number,
+    @response() res: Response,
   ): Promise<void> {
-    return await this.authorService.deleteAuthor(id);
+    try {
+      return await this.authorService.deleteAuthor(id);
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        res.status(NOT_FOUND);
+        res.send(error.message);
+      } else {
+        res.status(INTERNAL_SERVER_ERROR);
+        res.send(getStatusText(INTERNAL_SERVER_ERROR));
+      }
+    }
   }
 }

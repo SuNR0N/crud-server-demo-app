@@ -7,11 +7,12 @@ import { Repository } from 'typeorm';
 import { TYPES } from '../constants/types';
 import { CategoryUpdateDTO } from '../dtos/CategoryUpdateDTO';
 import { Category } from '../entities/Category';
+import { EntityNotFoundError } from '../errors/EntityNotFoundError';
 
 export interface ICategoryService {
   createCategory(category: CategoryUpdateDTO): Promise<Category>;
   deleteCategory(id: number): Promise<void>;
-  getCategory(id: number): Promise<Category | undefined>;
+  getCategory(id: number): Promise<Category>;
   getCategories(): Promise<Category[]>;
   updateCategory(id: number, category: CategoryUpdateDTO): Promise<Category>;
 }
@@ -24,16 +25,24 @@ export class CategoryService implements ICategoryService {
   ) { }
 
   public createCategory(category: CategoryUpdateDTO): Promise<Category> {
-    const newCategory = this.categoryRepository.create(category);
+    const newCategory = this.categoryRepository.create(category.toEntity());
     return this.categoryRepository.save(newCategory);
   }
 
-  public deleteCategory(id: number): Promise<void> {
+  public async deleteCategory(id: number): Promise<void> {
+    const category = this.categoryRepository.findOneById(id);
+    if (!category) {
+      throw new EntityNotFoundError(Category, id);
+    }
     return this.categoryRepository.deleteById(id);
   }
 
-  public getCategory(id: number): Promise<Category | undefined> {
-    return this.categoryRepository.findOneById(id);
+  public async getCategory(id: number): Promise<Category> {
+    const category = await this.categoryRepository.findOneById(id);
+    if (!category) {
+      throw new EntityNotFoundError(Category, id);
+    }
+    return category;
   }
 
   public getCategories(): Promise<Category[]> {
@@ -42,6 +51,13 @@ export class CategoryService implements ICategoryService {
 
   public async updateCategory(id: number, category: CategoryUpdateDTO): Promise<Category> {
     const existingCategory = await this.categoryRepository.findOneById(id);
-    return this.categoryRepository.save(existingCategory!);
+    if (!existingCategory) {
+      throw new EntityNotFoundError(Category, id);
+    }
+    const updatedCategory: Category = {
+      ...existingCategory,
+      ...category.toEntity(),
+    };
+    return this.categoryRepository.save(updatedCategory);
   }
 }

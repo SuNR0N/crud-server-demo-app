@@ -1,4 +1,9 @@
 import { Response } from 'express';
+import {
+  getStatusText,
+  INTERNAL_SERVER_ERROR,
+  NOT_FOUND,
+} from 'http-status-codes';
 import { inject } from 'inversify';
 import {
   controller,
@@ -13,17 +18,19 @@ import {
 
 import { TYPES } from '../constants/types';
 import {
+  IPublisherUpdateDTO,
   PublisherDTO,
   PublisherUpdateDTO,
 } from '../dtos';
+import { EntityNotFoundError } from '../errors/EntityNotFoundError';
 import { PublisherService } from '../services/PublisherService';
 
 export interface IPublisherController {
   getCategories(): Promise<PublisherDTO[]>;
   getPublisher(id: number, res: Response): Promise<PublisherDTO | undefined>;
-  createPublisher(newPublisher: PublisherUpdateDTO): Promise<PublisherDTO>;
-  updatePublisher(id: number, publisherUpdate: PublisherUpdateDTO): Promise<PublisherDTO | undefined>;
-  deletePublisher(id: number): Promise<void>;
+  createPublisher(newPublisher: IPublisherUpdateDTO): Promise<PublisherDTO>;
+  updatePublisher(id: number, publisherUpdate: IPublisherUpdateDTO, res: Response): Promise<PublisherDTO | undefined>;
+  deletePublisher(id: number, res: Response): Promise<void>;
 }
 
 @controller('/publishers')
@@ -44,12 +51,17 @@ export class PublisherController implements IPublisherController {
     @requestParam('id') id: number,
     @response() res: Response,
   ): Promise<PublisherDTO | undefined> {
-    const publisher = await this.publisherService.getPublisher(id);
-    if (publisher) {
+    try {
+      const publisher = await this.publisherService.getPublisher(id);
       return PublisherDTO.toDTO(publisher);
-    } else {
-      res.status(404);
-      res.send('Not Found');
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        res.status(NOT_FOUND);
+        res.send(error.message);
+      } else {
+        res.status(INTERNAL_SERVER_ERROR);
+        res.send(getStatusText(INTERNAL_SERVER_ERROR));
+      }
     }
   }
 
@@ -57,23 +69,45 @@ export class PublisherController implements IPublisherController {
   public async createPublisher(
     @requestBody() newPublisher: PublisherUpdateDTO,
   ): Promise<PublisherDTO> {
-    const createdPublisher = await this.publisherService.createPublisher(newPublisher);
+    const createdPublisher = await this.publisherService.createPublisher(new PublisherUpdateDTO(newPublisher));
     return PublisherDTO.toDTO(createdPublisher);
   }
 
   @httpPut('/:id')
   public async updatePublisher(
     @requestParam('id') id: number,
-    @requestBody() publisherUpdate: PublisherUpdateDTO,
+    @requestBody() publisherUpdate: IPublisherUpdateDTO,
+    @response() res: Response,
   ): Promise<PublisherDTO | undefined> {
-    const updatedPublisher = await this.publisherService.updatePublisher(id, publisherUpdate);
-    return PublisherDTO.toDTO(updatedPublisher);
+    try {
+      const updatedPublisher = await this.publisherService.updatePublisher(id, new PublisherUpdateDTO(publisherUpdate));
+      return PublisherDTO.toDTO(updatedPublisher);
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        res.status(NOT_FOUND);
+        res.send(error.message);
+      } else {
+        res.status(INTERNAL_SERVER_ERROR);
+        res.send(getStatusText(INTERNAL_SERVER_ERROR));
+      }
+    }
   }
 
   @httpDelete('/:id')
   public async deletePublisher(
     @requestParam('id') id: number,
+    @response() res: Response,
   ): Promise<void> {
-    return await this.publisherService.deletePublisher(id);
+    try {
+      return await this.publisherService.deletePublisher(id);
+    } catch (error) {
+      if (error instanceof EntityNotFoundError) {
+        res.status(NOT_FOUND);
+        res.send(error.message);
+      } else {
+        res.status(INTERNAL_SERVER_ERROR);
+        res.send(getStatusText(INTERNAL_SERVER_ERROR));
+      }
+    }
   }
 }

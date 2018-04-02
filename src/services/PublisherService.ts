@@ -7,11 +7,12 @@ import { Repository } from 'typeorm';
 import { TYPES } from '../constants/types';
 import { PublisherUpdateDTO } from '../dtos/PublisherUpdateDTO';
 import { Publisher } from '../entities/Publisher';
+import { EntityNotFoundError } from '../errors/EntityNotFoundError';
 
 export interface IPublisherService {
   createPublisher(publisher: PublisherUpdateDTO): Promise<Publisher>;
   deletePublisher(id: number): Promise<void>;
-  getPublisher(id: number): Promise<Publisher | undefined>;
+  getPublisher(id: number): Promise<Publisher>;
   getPublishers(): Promise<Publisher[]>;
   updatePublisher(id: number, publisher: PublisherUpdateDTO): Promise<Publisher>;
 }
@@ -24,16 +25,24 @@ export class PublisherService implements IPublisherService {
   ) { }
 
   public createPublisher(publisher: PublisherUpdateDTO): Promise<Publisher> {
-    const newPublisher = this.publisherRepository.create(publisher);
+    const newPublisher = this.publisherRepository.create(publisher.toEntity());
     return this.publisherRepository.save(newPublisher);
   }
 
-  public deletePublisher(id: number): Promise<void> {
+  public async deletePublisher(id: number): Promise<void> {
+    const publisher = await this.publisherRepository.findOneById(id);
+    if (!publisher) {
+      throw new EntityNotFoundError(Publisher, id);
+    }
     return this.publisherRepository.deleteById(id);
   }
 
-  public getPublisher(id: number): Promise<Publisher | undefined> {
-    return this.publisherRepository.findOneById(id);
+  public async getPublisher(id: number): Promise<Publisher> {
+    const publisher = await this.publisherRepository.findOneById(id);
+    if (!publisher) {
+      throw new EntityNotFoundError(Publisher, id);
+    }
+    return publisher;
   }
 
   public getPublishers(): Promise<Publisher[]> {
@@ -42,6 +51,13 @@ export class PublisherService implements IPublisherService {
 
   public async updatePublisher(id: number, publisher: PublisherUpdateDTO): Promise<Publisher> {
     const existingPublisher = await this.publisherRepository.findOneById(id);
-    return this.publisherRepository.save(existingPublisher!);
+    if (!existingPublisher) {
+      throw new EntityNotFoundError(Publisher, id);
+    }
+    const updatedPublisher: Publisher = {
+      ...existingPublisher,
+      ...publisher.toEntity(),
+    };
+    return this.publisherRepository.save(updatedPublisher);
   }
 }

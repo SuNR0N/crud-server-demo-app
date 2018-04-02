@@ -10,11 +10,12 @@ import {
   NewAuthorDTO,
 } from '../dtos';
 import { Author } from '../entities/Author';
+import { EntityNotFoundError } from '../errors/EntityNotFoundError';
 
 export interface IAuthorService {
   createAuthor(author: NewAuthorDTO): Promise<Author>;
   deleteAuthor(id: number): Promise<void>;
-  getAuthor(id: number): Promise<Author | undefined>;
+  getAuthor(id: number): Promise<Author>;
   getAuthors(): Promise<Author[]>;
   updateAuthor(id: number, author: AuthorUpdateDTO): Promise<Author>;
 }
@@ -27,16 +28,24 @@ export class AuthorService implements IAuthorService {
   ) { }
 
   public createAuthor(author: NewAuthorDTO): Promise<Author> {
-    const newAuthor = this.authorRepository.create(author);
+    const newAuthor = this.authorRepository.create(author.toEntity());
     return this.authorRepository.save(newAuthor);
   }
 
-  public deleteAuthor(id: number): Promise<void> {
+  public async deleteAuthor(id: number): Promise<void> {
+    const author = await this.authorRepository.findOneById(id);
+    if (!author) {
+      throw new EntityNotFoundError(Author, id);
+    }
     return this.authorRepository.deleteById(id);
   }
 
-  public getAuthor(id: number): Promise<Author | undefined> {
-    return this.authorRepository.findOneById(id);
+  public async getAuthor(id: number): Promise<Author> {
+    const author = await this.authorRepository.findOneById(id);
+    if (!author) {
+      throw new EntityNotFoundError(Author, id);
+    }
+    return author;
   }
 
   public getAuthors(): Promise<Author[]> {
@@ -45,6 +54,13 @@ export class AuthorService implements IAuthorService {
 
   public async updateAuthor(id: number, author: AuthorUpdateDTO): Promise<Author> {
     const existingAuthor = await this.authorRepository.findOneById(id);
-    return this.authorRepository.save(existingAuthor!);
+    if (!existingAuthor) {
+      throw new EntityNotFoundError(Author, id);
+    }
+    const updatedAuthor: Author = {
+      ...existingAuthor,
+      ...author.toEntity(),
+    };
+    return this.authorRepository.save(updatedAuthor);
   }
 }

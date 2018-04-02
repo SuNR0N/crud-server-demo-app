@@ -6,17 +6,18 @@ import { Repository } from 'typeorm';
 
 import { TYPES } from '../constants/types';
 import {
-  BookDTO,
+  BookUpdateDTO,
   NewBookDTO,
 } from '../dtos';
 import { Book } from '../entities/Book';
+import { EntityNotFoundError } from '../errors/EntityNotFoundError';
 
 export interface IBookService {
   createBook(newBook: NewBookDTO): Promise<Book>;
   deleteBook(id: number): Promise<void>;
-  getBook(id: number): Promise<Book | undefined>;
+  getBook(id: number): Promise<Book>;
   getBooks(): Promise<Book[]>;
-  updateBook(id: number, book: Partial<BookDTO>): Promise<Book>;
+  updateBook(id: number, book: BookUpdateDTO): Promise<Book>;
 }
 
 @injectable()
@@ -27,24 +28,39 @@ export class BookService implements IBookService {
   ) { }
 
   public createBook(book: NewBookDTO): Promise<Book> {
-    const newBook = this.bookRepository.create(book);
+    const newBook = this.bookRepository.create(book.toEntity());
     return this.bookRepository.save(newBook);
   }
 
-  public deleteBook(id: number): Promise<void> {
+  public async deleteBook(id: number): Promise<void> {
+    const book = await this.bookRepository.findOneById(id);
+    if (!book) {
+      throw new EntityNotFoundError(Book, id);
+    }
     return this.bookRepository.deleteById(id);
   }
 
-  public getBook(id: number): Promise<Book | undefined> {
-    return this.bookRepository.findOneById(id);
+  public async getBook(id: number): Promise<Book> {
+    const book = await this.bookRepository.findOneById(id);
+    if (!book) {
+      throw new EntityNotFoundError(Book, id);
+    }
+    return book;
   }
 
   public getBooks(): Promise<Book[]> {
     return this.bookRepository.find();
   }
 
-  public async updateBook(id: number, book: Partial<BookDTO>): Promise<Book> {
+  public async updateBook(id: number, book: BookUpdateDTO): Promise<Book> {
     const existingBook = await this.bookRepository.findOneById(id);
-    return this.bookRepository.save(existingBook!);
+    if (!existingBook) {
+      throw new EntityNotFoundError(Book, id);
+    }
+    const updatedBook: Book = {
+      ...existingBook,
+      ...book.toEntity(),
+    };
+    return this.bookRepository.save(updatedBook);
   }
 }
