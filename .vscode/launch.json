@@ -5,20 +5,30 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Current TS File",
+      "name": "Application",
       "type": "node",
       "request": "launch",
       "args": [
-        "${relativeFile}"
+        "src/index.ts"
       ],
       "runtimeArgs": [
-        "--nolazy",
         "-r",
         "ts-node/register"
       ],
-      "sourceMaps": true,
       "cwd": "${workspaceRoot}",
       "protocol": "inspector",
+      "internalConsoleOptions": "openOnSessionStart"
+    },
+    {
+      "name": "Current Jest Test",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": [
+        "${relativeFile}"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
     },
     {
       "type": "node",

@@ -1,8 +1,14 @@
+# OS
+.DS_Store
+
 # Build
 build
 
 # Dependencies
 node_modules
+
+# Coverage
+coverage
 
 # Logs
 *.log

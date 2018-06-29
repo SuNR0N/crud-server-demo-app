@@ -63,6 +63,15 @@ yarn test:coverage
 
 Instructions for debugging in _VS Code_:
 
+Method #1:
+
+1. Select the _Debug_ menu on the sidebar
+2. Select the _Application_ debug configuration
+3. Click on _Start Debugging_
+4. Put a breakpoint in the code
+
+Method #2:
+
 1. Start the application with `yarn dev` or `yarn debug`
 2. Select the _Debug_ menu on the sidebar
 3. Select the _Attach to Process_ debug configuration
