@@ -33,15 +33,15 @@ export class BookService implements IBookService {
   }
 
   public async deleteBook(id: number): Promise<void> {
-    const book = await this.bookRepository.findOneById(id);
+    const book = await this.bookRepository.findOne(id);
     if (!book) {
       throw new EntityNotFoundError(Book, id);
     }
-    return this.bookRepository.deleteById(id);
+    this.bookRepository.delete(id);
   }
 
   public async getBook(id: number): Promise<Book> {
-    const book = await this.bookRepository.findOneById(id);
+    const book = await this.bookRepository.findOne(id);
     if (!book) {
       throw new EntityNotFoundError(Book, id);
     }
@@ -53,7 +53,7 @@ export class BookService implements IBookService {
   }
 
   public async updateBook(id: number, book: BookUpdateDTO): Promise<Book> {
-    const existingBook = await this.bookRepository.findOneById(id);
+    const existingBook = await this.bookRepository.findOne(id);
     if (!existingBook) {
       throw new EntityNotFoundError(Book, id);
     }

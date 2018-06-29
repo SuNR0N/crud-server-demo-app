@@ -30,15 +30,15 @@ export class PublisherService implements IPublisherService {
   }
 
   public async deletePublisher(id: number): Promise<void> {
-    const publisher = await this.publisherRepository.findOneById(id);
+    const publisher = await this.publisherRepository.findOne(id);
     if (!publisher) {
       throw new EntityNotFoundError(Publisher, id);
     }
-    return this.publisherRepository.deleteById(id);
+    this.publisherRepository.delete(id);
   }
 
   public async getPublisher(id: number): Promise<Publisher> {
-    const publisher = await this.publisherRepository.findOneById(id);
+    const publisher = await this.publisherRepository.findOne(id);
     if (!publisher) {
       throw new EntityNotFoundError(Publisher, id);
     }
@@ -50,7 +50,7 @@ export class PublisherService implements IPublisherService {
   }
 
   public async updatePublisher(id: number, publisher: PublisherUpdateDTO): Promise<Publisher> {
-    const existingPublisher = await this.publisherRepository.findOneById(id);
+    const existingPublisher = await this.publisherRepository.findOne(id);
     if (!existingPublisher) {
       throw new EntityNotFoundError(Publisher, id);
     }

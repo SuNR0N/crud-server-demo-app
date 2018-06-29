@@ -33,15 +33,15 @@ export class AuthorService implements IAuthorService {
   }
 
   public async deleteAuthor(id: number): Promise<void> {
-    const author = await this.authorRepository.findOneById(id);
+    const author = await this.authorRepository.findOne(id);
     if (!author) {
       throw new EntityNotFoundError(Author, id);
     }
-    return this.authorRepository.deleteById(id);
+    this.authorRepository.delete(id);
   }
 
   public async getAuthor(id: number): Promise<Author> {
-    const author = await this.authorRepository.findOneById(id);
+    const author = await this.authorRepository.findOne(id);
     if (!author) {
       throw new EntityNotFoundError(Author, id);
     }
@@ -53,7 +53,7 @@ export class AuthorService implements IAuthorService {
   }
 
   public async updateAuthor(id: number, author: AuthorUpdateDTO): Promise<Author> {
-    const existingAuthor = await this.authorRepository.findOneById(id);
+    const existingAuthor = await this.authorRepository.findOne(id);
     if (!existingAuthor) {
       throw new EntityNotFoundError(Author, id);
     }

@@ -30,15 +30,15 @@ export class CategoryService implements ICategoryService {
   }
 
   public async deleteCategory(id: number): Promise<void> {
-    const category = this.categoryRepository.findOneById(id);
+    const category = this.categoryRepository.findOne(id);
     if (!category) {
       throw new EntityNotFoundError(Category, id);
     }
-    return this.categoryRepository.deleteById(id);
+    this.categoryRepository.delete(id);
   }
 
   public async getCategory(id: number): Promise<Category> {
-    const category = await this.categoryRepository.findOneById(id);
+    const category = await this.categoryRepository.findOne(id);
     if (!category) {
       throw new EntityNotFoundError(Category, id);
     }
@@ -50,7 +50,7 @@ export class CategoryService implements ICategoryService {
   }
 
   public async updateCategory(id: number, category: CategoryUpdateDTO): Promise<Category> {
-    const existingCategory = await this.categoryRepository.findOneById(id);
+    const existingCategory = await this.categoryRepository.findOne(id);
     if (!existingCategory) {
       throw new EntityNotFoundError(Category, id);
     }
