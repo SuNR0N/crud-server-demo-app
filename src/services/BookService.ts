@@ -11,6 +11,7 @@ import {
 } from '../dtos';
 import { Book } from '../entities/Book';
 import { EntityNotFoundError } from '../errors/EntityNotFoundError';
+import { dbErrorHandler } from '../util';
 
 export interface IBookService {
   createBook(newBook: NewBookDTO): Promise<Book>;
@@ -27,9 +28,14 @@ export class BookService implements IBookService {
     private readonly bookRepository: Repository<Book>,
   ) { }
 
-  public createBook(book: NewBookDTO): Promise<Book> {
+  public async createBook(book: NewBookDTO): Promise<Book> {
     const newBook = this.bookRepository.create(book.toEntity());
-    return this.bookRepository.save(newBook);
+    try {
+      return await this.bookRepository.save(newBook);
+    } catch (error) {
+      dbErrorHandler(error);
+      throw error;
+    }
   }
 
   public async deleteBook(id: number): Promise<void> {
@@ -61,6 +67,13 @@ export class BookService implements IBookService {
       ...existingBook,
       ...book.toEntity(),
     };
-    return this.bookRepository.save(updatedBook);
+    try {
+      // TODO: investigate why does it not return the updated relations
+      await this.bookRepository.save(updatedBook);
+      return await this.bookRepository.findOne(id) as Book;
+    } catch (error) {
+      dbErrorHandler(error);
+      throw error;
+    }
   }
 }

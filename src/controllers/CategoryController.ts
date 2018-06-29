@@ -15,6 +15,7 @@ import {
   requestParam,
   response,
 } from 'inversify-express-utils';
+import Joi from 'joi';
 
 import { TYPES } from '../constants/types';
 import {
@@ -22,6 +23,7 @@ import {
   CategoryUpdateDTO,
   ICategoryUpdateDTO,
 } from '../dtos';
+import { ValidationError } from '../errors/ValidationError';
 import { CategoryService } from '../services/CategoryService';
 import { errorHandler } from '../util/errorHandler';
 
@@ -51,7 +53,12 @@ export class CategoryController implements ICategoryController {
     @requestParam('id') id: number,
     @response() res: Response,
   ): Promise<CategoryDTO | undefined> {
+    const idSchema = Joi.number().label('id');
+    const result = Joi.validate(id, idSchema);
     try {
+      if (result.error) {
+        throw new ValidationError(result.error.message);
+      }
       const category = await this.categoryService.getCategory(id);
       return CategoryDTO.toDTO(category);
     } catch (error) {
@@ -65,9 +72,20 @@ export class CategoryController implements ICategoryController {
     @request() req: Request,
     @response() res: Response,
   ): Promise<void> {
-    const createdCategory = await this.categoryService.createCategory(new CategoryUpdateDTO(newCategory));
-    res.location(`${req.originalUrl}/${createdCategory.id}`);
-    res.sendStatus(CREATED);
+    const newCategorySchema = {
+      name: Joi.string().required(),
+    };
+    const result = Joi.validate(newCategory, newCategorySchema);
+    try {
+      if (result.error) {
+        throw new ValidationError(result.error.message);
+      }
+      const createdCategory = await this.categoryService.createCategory(new CategoryUpdateDTO(newCategory));
+      res.location(`${req.originalUrl}/${createdCategory.id}`);
+      res.sendStatus(CREATED);
+    } catch (error) {
+      errorHandler(error, res);
+    }
   }
 
   @httpPut('/:id')
@@ -76,7 +94,18 @@ export class CategoryController implements ICategoryController {
     @requestBody() categoryUpdate: ICategoryUpdateDTO,
     @response() res: Response,
   ): Promise<CategoryDTO | undefined> {
+    const idSchema = Joi.number().label('id');
+    const categoryUpdateSchema = {
+      name: Joi.string().required(),
+    };
+    const resultId = Joi.validate(id, idSchema);
+    const resultCategoryUpdate = Joi.validate(categoryUpdate, categoryUpdateSchema);
     try {
+      if (resultId.error) {
+        throw new ValidationError(resultId.error.message);
+      } else if (resultCategoryUpdate.error) {
+        throw new ValidationError(resultCategoryUpdate.error.message);
+      }
       const updatedCategory = await this.categoryService.updateCategory(id, new CategoryUpdateDTO(categoryUpdate));
       return CategoryDTO.toDTO(updatedCategory);
     } catch (error) {
@@ -89,7 +118,12 @@ export class CategoryController implements ICategoryController {
     @requestParam('id') id: number,
     @response() res: Response,
   ): Promise<void> {
+    const idSchema = Joi.number().label('id');
+    const result = Joi.validate(id, idSchema);
     try {
+      if (result.error) {
+        throw new ValidationError(result.error.message);
+      }
       return await this.categoryService.deleteCategory(id);
     } catch (error) {
       errorHandler(error, res);

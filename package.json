@@ -24,7 +24,7 @@
     "lint:fix": "tslint --fix -p tsconfig.json",
     "start": "ts-node src/index.ts",
     "test": "jest --watchAll",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage --runInBand"
   },
   "dependencies": {
     "body-parser": "^1.18.3",

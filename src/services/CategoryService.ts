@@ -30,7 +30,7 @@ export class CategoryService implements ICategoryService {
   }
 
   public async deleteCategory(id: number): Promise<void> {
-    const category = this.categoryRepository.findOne(id);
+    const category = await this.categoryRepository.findOne(id);
     if (!category) {
       throw new EntityNotFoundError(Category, id);
     }
