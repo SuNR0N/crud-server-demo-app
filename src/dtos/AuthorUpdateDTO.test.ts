@@ -24,7 +24,7 @@ describe('AuthorUpdateDTO', () => {
   });
 
   describe('toEntity', () => {
-    it('should return a partial author entity from the DTO', () => {
+    it('should return an author entity from the DTO', () => {
       expect(dto.toEntity()).toStrictEqual({
         first_name: 'John',
         last_name: 'Doe',

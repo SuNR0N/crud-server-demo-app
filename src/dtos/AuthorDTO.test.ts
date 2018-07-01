@@ -49,7 +49,7 @@ describe('AuthorDTO', () => {
   });
 
   describe('constructor', () => {
-    it('should default all properties to null', () => {
+    it('should default all properties if called without an argument', () => {
       const dto = new AuthorDTO();
 
       expect(dto.firstName).toBeNull();

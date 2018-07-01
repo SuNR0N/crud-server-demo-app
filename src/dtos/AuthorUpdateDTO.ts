@@ -1,4 +1,5 @@
 import { Author } from '../entities/Author';
+import { Utils } from '../util/Utils';
 
 export interface IAuthorUpdateDTO {
   firstName?: string;
@@ -17,7 +18,7 @@ export class AuthorUpdateDTO implements IAuthorUpdateDTO {
     this.middleName = data.middleName;
   }
 
-  public toEntity = (): Partial<Author> => ({
+  public toEntity = (): Partial<Author> => Utils.cleanObject({
     first_name: this.firstName,
     last_name: this.lastName,
     middle_name: this.middleName,

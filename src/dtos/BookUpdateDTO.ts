@@ -4,6 +4,7 @@ import {
   Category,
   Publisher,
 } from '../entities';
+import { Utils } from '../util/Utils';
 
 export interface IBookUpdateDTO {
   authors?: number[];
@@ -34,41 +35,25 @@ export class BookUpdateDTO implements IBookUpdateDTO {
     this.title = data.title;
   }
 
-  public toEntity = (): Partial<Book> => {
-    const book: Partial<Book> = {};
-    if (Array.isArray(this.authors)) {
-      book.authors = this.authors.map((authorId) => {
-        const author = new Author();
-        author.id = authorId;
-        return author;
-      });
-    }
-    if (Array.isArray(this.categories)) {
-      book.categories = this.categories.map((categoryId) => {
-        const category = new Category();
-        category.id = categoryId;
-        return category;
-      });
-    }
-    if (this.isbn10) {
-      book.isbn10 = this.isbn10;
-    }
-    if (this.isbn13) {
-      book.isbn13 = this.isbn13;
-    }
-    if (this.publicationDate) {
-      book.publicationDate = this.publicationDate;
-    }
-    if (Array.isArray(this.publishers)) {
-      book.publishers = this.publishers.map((publisherId) => {
-        const publisher = new Publisher();
-        publisher.id = publisherId;
-        return publisher;
-      });
-    }
-    if (this.title) {
-      book.title = this.title;
-    }
-    return book;
-  }
+  public toEntity = (): Partial<Book> => Utils.cleanObject({
+    authors: Array.isArray(this.authors) ? this.authors.map((authorId) => {
+      const author = new Author();
+      author.id = authorId;
+      return author;
+    }) : undefined,
+    categories: Array.isArray(this.categories) ? this.categories.map((categoryId) => {
+      const category = new Category();
+      category.id = categoryId;
+      return category;
+    }) : undefined,
+    isbn10: this.isbn10,
+    isbn13: this.isbn13,
+    publicationDate: this.publicationDate,
+    publishers: Array.isArray(this.publishers) ? this.publishers.map((publisherId) => {
+      const publisher = new Publisher();
+      publisher.id = publisherId;
+      return publisher;
+    }) : undefined,
+    title: this.title,
+  })
 }

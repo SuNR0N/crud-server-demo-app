@@ -1,28 +1,11 @@
 import {
   createLogger,
   format,
+  Logger,
   transports,
 } from 'winston';
 
-export type LogLevel = 'silly' | 'debug' | 'verbose' | 'info' | 'warn' | 'error';
-export interface ILogEntry {
-  level: LogLevel;
-  message: string;
-  meta?: any;
-}
-export interface ILogger {
-  add: (transport: any) => void;
-  debug: (message: string) => void;
-  error: (message: string) => void;
-  info: (message: string) => void;
-  log: (entry: ILogEntry) => void;
-  remove: (transport: any) => void;
-  silly: (message: string) => void;
-  verbose: (message: string) => void;
-  warn: (message: string) => void;
-}
-
-export const logger: ILogger = createLogger({
+export const logger: Logger = createLogger({
   format: format.json(),
   level: 'info',
   transports: [
@@ -53,7 +36,7 @@ if (process.env.NODE_ENV !== 'production') {
   }));
 }
 
-export const requestLogger: ILogger = createLogger({
+export const requestLogger: Logger = createLogger({
   format: format.combine(
     format.colorize(),
     format.timestamp({
