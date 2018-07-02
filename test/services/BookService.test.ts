@@ -4,6 +4,7 @@ import {
 } from '../../src/dtos';
 import { Book } from '../../src/entities/Book';
 import { BookService } from '../../src/services/BookService';
+import * as errorHandler from '../../src/util/errorHandler';
 
 describe('BookService', () => {
   const bookEntity = {} as Book;
@@ -50,8 +51,27 @@ describe('BookService', () => {
       expect(bookRepository.save).toHaveBeenCalledWith(bookEntity);
     });
 
-    it('should call the dbErrorHandler function if the save fails', () => {
-      // TODO
+    it('should call the dbErrorHandler function if the save fails', async () => {
+      const error = new Error();
+      bookRepository.save.mockImplementationOnce(() => {
+        throw error;
+      });
+      const dbErrorHandlerSpy = jest.spyOn(errorHandler, 'dbErrorHandler');
+      try {
+        await bookService.createBook(newBook);
+      } catch {
+        // Do nothing
+      }
+
+      expect(dbErrorHandlerSpy).toHaveBeenCalledWith(error);
+    });
+
+    it('should rethrow the error if the save fails', () => {
+      const error = new Error();
+      bookRepository.save.mockImplementationOnce(() => {
+        throw error;
+      });
+      expect(bookService.createBook(newBook)).rejects.toThrowError(error);
     });
   });
 
@@ -159,8 +179,29 @@ describe('BookService', () => {
       expect(updatedBook).toBe(updatedBookEntity);
     });
 
-    it('should call the dbErrorHandler function if the save fails', () => {
-      // TODO
+    it('should call the dbErrorHandler function if the save fails', async () => {
+      const error = new Error();
+      bookRepository.findOne.mockImplementationOnce(() => book);
+      bookRepository.save.mockImplementationOnce(() => {
+        throw error;
+      });
+      const dbErrorHandlerSpy = jest.spyOn(errorHandler, 'dbErrorHandler');
+      try {
+        await bookService.updateBook(id, bookUpdateDTO);
+      } catch {
+        // Do nothing
+      }
+
+      expect(dbErrorHandlerSpy).toHaveBeenCalledWith(error);
+    });
+
+    it('should rethrow the error if the save fails', () => {
+      const error = new Error();
+      bookRepository.findOne.mockImplementationOnce(() => book);
+      bookRepository.save.mockImplementationOnce(() => {
+        throw error;
+      });
+      expect(bookService.updateBook(id, bookUpdateDTO)).rejects.toThrowError(error);
     });
   });
 });

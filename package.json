@@ -10,6 +10,7 @@
     "Express.js",
     "InversifyJS",
     "Jest",
+    "Joi",
     "Node.js",
     "PostgreSQL",
     "Swagger",
@@ -64,6 +65,10 @@
       "tsx",
       "js",
       "json"
+    ],
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/node_modules/",
+      "<rootDir>/test/"
     ]
   }
 }
