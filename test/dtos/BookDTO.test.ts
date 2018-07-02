@@ -1,5 +1,5 @@
-import { Book } from '../entities/Book';
-import { BookDTO } from './BookDTO';
+import { BookDTO } from '../../src/dtos/BookDTO';
+import { Book } from '../../src/entities/Book';
 
 describe('BookDTO', () => {
   describe('toDTO', () => {
@@ -49,6 +49,31 @@ describe('BookDTO', () => {
           'Foo',
           'Bar',
         ],
+        title: 'FooBar',
+      });
+    });
+
+    it('should map the entity to DTO if relationships do not exist', () => {
+      const book = {
+        authors: null,
+        categories: null,
+        id: 1,
+        isbn10: '1234567890',
+        isbn13: '123456789123',
+        publicationDate: '2001-02-03',
+        publishers: null,
+        title: 'FooBar',
+      } as any as Book;
+      const dto = BookDTO.toDTO(book);
+
+      expect(dto).toEqual({
+        authors: [],
+        categories: [],
+        id: 1,
+        isbn10: '1234567890',
+        isbn13: '123456789123',
+        publicationDate: '2001-02-03',
+        publishers: [],
         title: 'FooBar',
       });
     });

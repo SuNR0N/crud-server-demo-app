@@ -1,14 +1,14 @@
-import { Category } from '../entities/Category';
-import { CategoryDTO } from './CategoryDTO';
+import { PublisherDTO } from '../../src/dtos/PublisherDTO';
+import { Publisher } from '../../src/entities/Publisher';
 
-describe('CategoryDTO', () => {
+describe('PublisherDTO', () => {
   describe('toDTO', () => {
     it('should map the entity to DTO', () => {
-      const category = {
+      const publisher = {
         id: 1,
         name: 'Foo',
-      } as Category;
-      const dto = CategoryDTO.toDTO(category);
+      } as Publisher;
+      const dto = PublisherDTO.toDTO(publisher);
 
       expect(dto).toEqual({
         id: 1,
@@ -19,14 +19,14 @@ describe('CategoryDTO', () => {
 
   describe('constructor', () => {
     it('should default all properties if called without an argument', () => {
-      const dto = new CategoryDTO();
+      const dto = new PublisherDTO();
 
       expect(dto.id).toBeNull();
       expect(dto.name).toBeNull();
     });
 
     it('should set the properties if an argument is provided', () => {
-      const dto = new CategoryDTO({
+      const dto = new PublisherDTO({
         id: 1,
         name: 'Foo',
       });

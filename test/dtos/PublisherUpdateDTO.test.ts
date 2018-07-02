@@ -1,7 +1,7 @@
 import {
   IPublisherUpdateDTO,
   PublisherUpdateDTO,
-} from './PublisherUpdateDTO';
+} from '../../src/dtos/PublisherUpdateDTO';
 
 describe('PublisherUpdateDTO', () => {
   const data: IPublisherUpdateDTO = {

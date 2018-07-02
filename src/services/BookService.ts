@@ -11,7 +11,7 @@ import {
 } from '../dtos';
 import { Book } from '../entities/Book';
 import { EntityNotFoundError } from '../errors/EntityNotFoundError';
-import { dbErrorHandler } from '../util';
+import { dbErrorHandler } from '../util/errorHandler';
 
 export interface IBookService {
   createBook(newBook: NewBookDTO): Promise<Book>;

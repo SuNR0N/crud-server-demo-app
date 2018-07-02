@@ -1,7 +1,7 @@
 import {
   CategoryUpdateDTO,
   ICategoryUpdateDTO,
-} from './CategoryUpdateDTO';
+} from '../../src/dtos/CategoryUpdateDTO';
 
 describe('CategoryUpdateDTO', () => {
   const data: ICategoryUpdateDTO = {

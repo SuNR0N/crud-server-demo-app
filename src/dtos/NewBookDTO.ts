@@ -4,6 +4,7 @@ import {
   Category,
   Publisher,
 } from '../entities';
+import { Utils } from '../util/Utils';
 
 export interface INewBookDTO {
   authors?: number[];
@@ -34,7 +35,7 @@ export class NewBookDTO implements INewBookDTO {
     this.title = data.title;
   }
 
-  public toEntity = (): Partial<Book> => ({
+  public toEntity = (): Partial<Book> => Utils.cleanObject({
     authors: Array.isArray(this.authors) ?
       this.authors.map((authorId) => {
         const author = new Author();

@@ -1,8 +1,8 @@
-import { Author } from '../entities';
 import {
   AuthorDTO,
   fullNameMapper,
-} from './AuthorDTO';
+} from '../../src/dtos/AuthorDTO';
+import { Author } from '../../src/entities/Author';
 
 describe('AuthorDTO', () => {
   describe('fullNameMapper', () => {

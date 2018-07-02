@@ -1,15 +1,15 @@
 import {
+  INewBookDTO,
+  NewBookDTO,
+} from '../../src/dtos/NewBookDTO';
+import {
   Author,
   Category,
   Publisher,
-} from '../entities';
-import {
-  BookUpdateDTO,
-  IBookUpdateDTO,
-} from './BookUpdateDTO';
+} from '../../src/entities';
 
-describe('BookUpdateDTO', () => {
-  const data: IBookUpdateDTO = {
+describe('NewBookDTO', () => {
+  const data: INewBookDTO = {
     authors: [
       1,
       3,
@@ -27,10 +27,10 @@ describe('BookUpdateDTO', () => {
     ],
     title: 'FooBar',
   };
-  let dto: BookUpdateDTO;
+  let dto: NewBookDTO;
 
   beforeEach(() => {
-    dto = new BookUpdateDTO(data);
+    dto = new NewBookDTO(data);
   });
 
   describe('constructor', () => {
@@ -95,12 +95,14 @@ describe('BookUpdateDTO', () => {
     });
 
     it('should return a partial book entity with defined properties only', () => {
-      const partialData: IBookUpdateDTO = {
+      const partialData: INewBookDTO = {
+        isbn13: '1234567890123',
         title: 'FooBar',
       };
-      const partialDto = new BookUpdateDTO(partialData);
+      const partialDto = new NewBookDTO(partialData);
 
       expect(partialDto.toEntity()).toStrictEqual({
+        isbn13: '1234567890123',
         title: 'FooBar',
       });
     });

@@ -1,18 +1,18 @@
 import {
-  AuthorUpdateDTO,
-  IAuthorUpdateDTO,
-} from './AuthorUpdateDTO';
+  INewAuthorDTO,
+  NewAuthorDTO,
+} from '../../src/dtos/NewAuthorDTO';
 
-describe('AuthorUpdateDTO', () => {
-  const data: IAuthorUpdateDTO = {
+describe('NewAuthorDTO', () => {
+  const data: INewAuthorDTO = {
     firstName: 'John',
     lastName: 'Doe',
     middleName: 'X',
   };
-  let dto: AuthorUpdateDTO;
+  let dto: NewAuthorDTO;
 
   beforeEach(() => {
-    dto = new AuthorUpdateDTO(data);
+    dto = new NewAuthorDTO(data);
   });
 
   describe('constructor', () => {
@@ -33,13 +33,15 @@ describe('AuthorUpdateDTO', () => {
     });
 
     it('should return a partial author entity with defined properties only', () => {
-      const partialData: IAuthorUpdateDTO = {
+      const partialData: INewAuthorDTO = {
         firstName: 'John',
+        lastName: 'Doe',
       };
-      const partialDto = new AuthorUpdateDTO(partialData);
+      const partialDto = new NewAuthorDTO(partialData);
 
       expect(partialDto.toEntity()).toStrictEqual({
         first_name: 'John',
+        last_name: 'Doe',
       });
     });
   });
