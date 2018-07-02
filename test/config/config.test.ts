@@ -10,6 +10,14 @@ describe('Configuration', () => {
     process.env = environmentVariables;
   });
 
+  describe('API_DOCS_PATH', () => {
+    it('should be set to "/api-docs"', async () => {
+      const { Configuration } = await import('../../src/config/config');
+
+      expect(Configuration.API_DOCS_PATH).toBe('/api-docs');
+    });
+  });
+
   describe('DATABASE_DB', () => {
     it('should be set to "testdb"', async () => {
       const { Configuration } = await import('../../src/config/config');
@@ -111,6 +119,14 @@ describe('Configuration', () => {
       const { Configuration } = await import('../../src/config/config');
 
       expect(Configuration.ROOT_PATH).toBe('/api/v1');
+    });
+  });
+
+  describe('SWAGGER_SPEC_PATH', () => {
+    it('should ends with "/swagger/swagger.yaml"', async () => {
+      const { Configuration } = await import('../../src/config/config');
+
+      expect(Configuration.SWAGGER_SPEC_PATH.endsWith('/swagger/swagger.yaml')).toBe(true);
     });
   });
 });

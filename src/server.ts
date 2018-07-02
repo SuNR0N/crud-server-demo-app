@@ -3,6 +3,11 @@ import 'reflect-metadata';
 import * as bodyParser from 'body-parser';
 import * as expressWinston from 'express-winston';
 import { InversifyExpressServer } from 'inversify-express-utils';
+import {
+  serve,
+  setup,
+} from 'swagger-ui-express';
+import { parse } from 'yamljs';
 
 import {
   Configuration,
@@ -14,6 +19,7 @@ import {
 } from './util';
 import { Container } from 'inversify';
 import { Application } from 'express';
+import { readFileSync } from 'fs';
 
 export async function getServerInstance(): Promise<Application> {
   const container = new Container();
@@ -39,6 +45,10 @@ export async function getServerInstance(): Promise<Application> {
     app.use(expressWinston.errorLogger({
       winstonInstance: logger,
     }));
+
+    // Swagger
+    const swaggerDocument = parse(readFileSync(Configuration.SWAGGER_SPEC_PATH, 'utf8'));
+    app.use(Configuration.API_DOCS_PATH, serve, setup(swaggerDocument));
 
   });
 

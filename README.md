@@ -6,6 +6,7 @@ Table of Contents
 * [Install](#install)
 * [Run](#run)
 * [Test](#test)
+* [API Documentation](#api-documentation)
 * [Debug](#debug)
 
 ## Prerequisites
@@ -58,6 +59,12 @@ yarn test
 # With coverage report
 yarn test:coverage
 ```
+
+## API Documentation
+
+The API specification can be found at `swagger/swagger.yaml`.
+
+Once you start the server the Swagger UI will serve the documentation at http://localhost:3000/api-docs
 
 ## Debug
 
