@@ -2,8 +2,9 @@ import { Response } from 'express';
 
 import { Book } from '../../src/entities/Book';
 import {
-  ConstraintViolationError,
   EntityNotFoundError,
+  ForeignKeyConstraintError,
+  UniqueConstraintError,
   ValidationError,
 } from '../../src/errors';
 import {
@@ -35,20 +36,30 @@ describe('errorHandler', () => {
       expect(sendSpy).toHaveBeenCalledWith('Book with ID = 1 does not exist');
     });
 
+    it('should handle ForeignKeyConstraintError', () => {
+      const error = new ForeignKeyConstraintError('constraint', '1', 'foo');
+      errorHandler(error, responseMock);
+
+      expect(statusSpy).toHaveBeenCalledWith(400);
+      expect(sendSpy)
+        .toHaveBeenCalledWith('A foreign key constraint violation occurred. Foo with ID = 1 does not exist');
+    });
+
+    it('should handle UniqueConstraintError', () => {
+      const error = new UniqueConstraintError('constraint', 'foo', '1');
+      errorHandler(error, responseMock);
+
+      expect(statusSpy).toHaveBeenCalledWith(409);
+      expect(sendSpy)
+        .toHaveBeenCalledWith('A unique constraint violation occurred. Key (foo) with value (1) already exists');
+    });
+
     it('should handle ValidationError', () => {
       const error = new ValidationError('Foo');
       errorHandler(error, responseMock);
 
       expect(statusSpy).toHaveBeenCalledWith(400);
       expect(sendSpy).toHaveBeenCalledWith('Foo');
-    });
-
-    it('should handle ConstraintViolationError', () => {
-      const error = new ConstraintViolationError('constraint', '1', 'foo');
-      errorHandler(error, responseMock);
-
-      expect(statusSpy).toHaveBeenCalledWith(400);
-      expect(sendSpy).toHaveBeenCalledWith('A constraint violation occurred. Foo with ID = 1 does not exist');
     });
 
     it('should handle an unknown error', () => {
@@ -64,17 +75,17 @@ describe('errorHandler', () => {
 
   describe('dbErrorHandler', () => {
     // tslint:disable-next-line:max-line-length
-    it('should throw a ConstraintViolationError given it has a constraint property and the message matches the regular expression', () => {
+    it('should throw a ForeignKeyConstraintError given it has a constraint property and the message matches the regular expression', () => {
       const error = {
         constraint: 'fk_123',
         message: 'insert or update on table "foo" violates foreign key constraint "fk_1234"',
       };
       expect(() => {
         dbErrorHandler(error);
-      }).toThrow(ConstraintViolationError);
+      }).toThrow(ForeignKeyConstraintError);
     });
 
-    it('should throw a ConstraintViolationError with details if the error has more details', () => {
+    it('should throw a ForeignKeyConstraintError with details if the error has more details', () => {
       const error = {
         constraint: 'fk_123',
         detail: 'Key (foo)=(1) is not present in table "foo".',
@@ -82,16 +93,39 @@ describe('errorHandler', () => {
       };
       expect(() => {
         dbErrorHandler(error);
-      }).toThrowError('A constraint violation occurred. Foo with ID = 1 does not exist');
+      }).toThrowError('A foreign key constraint violation occurred. Foo with ID = 1 does not exist');
     });
 
-    it('should not throw a ConstraintViolationError given the message does not match the regular expression', () => {
+    // tslint:disable-next-line:max-line-length
+    it('should throw a UniqueConstraintError given it has a constraint property and the message matches the regular expression', () => {
       const error = {
-        message: 'null value in column "id" violates not-null constraint',
+        constraint: 'fk_123',
+        message: 'duplicate key value violates unique constraint "fk_123"',
       };
       expect(() => {
         dbErrorHandler(error);
-      }).not.toThrow(ConstraintViolationError);
+      }).toThrow(UniqueConstraintError);
+    });
+
+    it('should throw a UniqueConstraintError with details if the error has more details', () => {
+      const error = {
+        constraint: 'fk_123',
+        detail: 'Key (foo)=(1234) already exists.',
+        message: 'duplicate key value violates unique constraint "fk_123"',
+      };
+      expect(() => {
+        dbErrorHandler(error);
+      }).toThrow('A unique constraint violation occurred. Key (foo) with value (1234) already exists');
+    });
+
+    it('should not throw an error given the message does not match the regular expressions', () => {
+      const error = {
+        message: 'null value in column "id" violates not-null constraint',
+      };
+
+      expect(() => {
+        dbErrorHandler(error);
+      }).not.toThrow();
     });
   });
 });

@@ -123,7 +123,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('A constraint violation occurred. Author with ID = 999 does not exist');
+        .toEqual('A foreign key constraint violation occurred. Author with ID = 999 does not exist');
     });
 
     it('should return a 400 if a provided author has an invalid type', async () => {
@@ -157,7 +157,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('A constraint violation occurred. Category with ID = 999 does not exist');
+        .toEqual('A foreign key constraint violation occurred. Category with ID = 999 does not exist');
     });
 
     it('should return a 400 if a provided category has an invalid type', async () => {
@@ -191,7 +191,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('A constraint violation occurred. Publisher with ID = 999 does not exist');
+        .toEqual('A foreign key constraint violation occurred. Publisher with ID = 999 does not exist');
     });
 
     it('should return a 400 if a provided publisher has an invalid type', async () => {
@@ -209,6 +209,19 @@ describe('BookController', () => {
       expect(response.status).toBe(400);
       expect(response.text)
         .toEqual('child "publishers" fails because ["publishers" at position 1 fails because ["1" must be a number]]');
+    });
+
+    it('should return a 409 if a book already exists with the provided isbn13', async () => {
+      const response = await agent(serverInstance)
+        .post('/api/v1/books')
+        .send({
+          isbn13: '9780596517748',
+          title: 'FooBar',
+        });
+
+      expect(response.status).toBe(409);
+      expect(response.text)
+      .toEqual('A unique constraint violation occurred. Key (isbn_13) with value (9780596517748) already exists');
     });
 
     describe('given it creates the book', () => {
@@ -311,7 +324,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('A constraint violation occurred. Author with ID = 999 does not exist');
+        .toEqual('A foreign key constraint violation occurred. Author with ID = 999 does not exist');
     });
 
     it('should return a 400 if a provided author has an invalid type', async () => {
@@ -343,7 +356,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('A constraint violation occurred. Category with ID = 999 does not exist');
+        .toEqual('A foreign key constraint violation occurred. Category with ID = 999 does not exist');
     });
 
     it('should return a 400 if a provided category has an invalid type', async () => {
@@ -373,7 +386,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('A constraint violation occurred. Publisher with ID = 999 does not exist');
+        .toEqual('A foreign key constraint violation occurred. Publisher with ID = 999 does not exist');
     });
 
     it('should return a 400 if a provided publisher has an invalid type', async () => {

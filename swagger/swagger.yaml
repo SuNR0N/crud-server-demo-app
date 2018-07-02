@@ -1,9 +1,9 @@
 openapi: 3.0.0
 servers:
   - description: localhost
-    url: http://localhost:3000/api/v1
+    url: 'http://localhost:3000/api/v1'
 info:
-  version: "1.0.0"
+  version: 1.0.0
   title: CRUD Server Demo Application API
   contact:
     email: annus.norbert@gmail.com
@@ -55,13 +55,20 @@ paths:
               description: The relative resource URI of the created author
         '400':
           description: Validation failed
+          content:
+            text:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorFirstNameIsRequired'
+                  - $ref: '#/components/schemas/ErrorLastNameIsRequired'
+                  - $ref: '#/components/schemas/ErrorUnknownProperty'
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/NewAuthorDTO'
         description: Properties of the new author to create
-  /authors/:id:
+  '/authors/:id':
     get:
       tags:
         - authors
@@ -83,8 +90,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthorDTO'
+        '400':
+          description: Validation failed
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorInvalidID'
         '404':
           description: Author does not exist with the given ID
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorAuthorDoesNotExist'
     delete:
       tags:
         - authors
@@ -102,8 +119,18 @@ paths:
       responses:
         '204':
           description: Author has been successfully removed
+        '400':
+          description: Validation failed
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorInvalidID'
         '404':
-          description: Author does not exist with the given ID      
+          description: Author does not exist with the given ID
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorAuthorDoesNotExist'
     patch:
       tags:
         - authors
@@ -132,8 +159,18 @@ paths:
                 $ref: '#/components/schemas/AuthorDTO'
         '400':
           description: Validation failed
+          content:
+            text:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorInvalidID'
+                  - $ref: '#/components/schemas/ErrorUnknownProperty'
         '404':
           description: Author does not exist with the given ID
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorAuthorDoesNotExist'
   /books:
     get:
       tags:
@@ -169,15 +206,32 @@ paths:
               description: The relative resource URI of the created book
         '400':
           description: Validation failed
+          content:
+            text:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorConstraintAuthor'
+                  - $ref: '#/components/schemas/ErrorConstraintCategory'
+                  - $ref: '#/components/schemas/ErrorConstraintPublisher'
+                  - $ref: '#/components/schemas/ErrorISBN13IsRequired'
+                  - $ref: '#/components/schemas/ErrorInvalidAuthorType'
+                  - $ref: '#/components/schemas/ErrorInvalidCategoryType'
+                  - $ref: '#/components/schemas/ErrorInvalidPublisherType'
+                  - $ref: '#/components/schemas/ErrorTitleIsRequired'
+                  - $ref: '#/components/schemas/ErrorUnknownProperty'
         '409':
-          description: Book already exists with the given ISBN-13
+          description: Conflict
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorBookConflict'
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/NewBookDTO'
         description: Properties of the new book to create
-  /books/:id:
+  '/books/:id':
     get:
       tags:
         - books
@@ -199,8 +253,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BookDTO'
+        '400':
+          description: Validation failed
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorInvalidID'
         '404':
           description: Book does not exist with the given ID
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorBookDoesNotExist'
     delete:
       tags:
         - books
@@ -218,8 +282,18 @@ paths:
       responses:
         '204':
           description: Book has been successfully removed
+        '400':
+          description: Validation failed
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorInvalidID'
         '404':
-          description: Book does not exist with the given ID      
+          description: Book does not exist with the given ID
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorBookDoesNotExist'
     patch:
       tags:
         - books
@@ -248,8 +322,24 @@ paths:
                 $ref: '#/components/schemas/BookDTO'
         '400':
           description: Validation failed
+          content:
+            text:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorConstraintAuthor'
+                  - $ref: '#/components/schemas/ErrorConstraintCategory'
+                  - $ref: '#/components/schemas/ErrorConstraintPublisher'
+                  - $ref: '#/components/schemas/ErrorInvalidAuthorType'
+                  - $ref: '#/components/schemas/ErrorInvalidCategoryType'
+                  - $ref: '#/components/schemas/ErrorInvalidID'
+                  - $ref: '#/components/schemas/ErrorInvalidPublisherType'
+                  - $ref: '#/components/schemas/ErrorUnknownProperty'
         '404':
           description: Book does not exist with the given ID
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorBookDoesNotExist'
   /categories:
     get:
       tags:
@@ -285,13 +375,19 @@ paths:
               description: The relative resource URI of the created category
         '400':
           description: Validation failed
+          content:
+            text:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorNameIsRequired'
+                  - $ref: '#/components/schemas/ErrorUnknownProperty'
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CategoryUpdateDTO'
         description: Properties of the new category to create
-  /categories/:id:
+  '/categories/:id':
     get:
       tags:
         - categories
@@ -313,8 +409,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CategoryDTO'
+        '400':
+          description: Validation failed
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorInvalidID'
         '404':
           description: Category does not exist with the given ID
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorCategoryDoesNotExist'
     delete:
       tags:
         - categories
@@ -332,8 +438,18 @@ paths:
       responses:
         '204':
           description: Category has been successfully removed
+        '400':
+          description: Validation failed
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorInvalidID'
         '404':
-          description: Category does not exist with the given ID      
+          description: Category does not exist with the given ID
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorCategoryDoesNotExist'
     put:
       tags:
         - categories
@@ -362,8 +478,19 @@ paths:
                 $ref: '#/components/schemas/CategoryDTO'
         '400':
           description: Validation failed
+          content:
+            text:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorInvalidID'
+                  - $ref: '#/components/schemas/ErrorNameIsRequired'
+                  - $ref: '#/components/schemas/ErrorUnknownProperty'
         '404':
-          description: Category does not exist with the given ID        
+          description: Category does not exist with the given ID
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorCategoryDoesNotExist'
   /publishers:
     get:
       tags:
@@ -399,13 +526,19 @@ paths:
               description: The relative resource URI of the created publisher
         '400':
           description: Validation failed
+          content:
+            text:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorNameIsRequired'
+                  - $ref: '#/components/schemas/ErrorUnknownProperty'
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/PublisherUpdateDTO'
         description: Properties of the new publisher to create
-  /publishers/:id:
+  '/publishers/:id':
     get:
       tags:
         - publishers
@@ -427,8 +560,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PublisherDTO'
+        '400':
+          description: Validation failed
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorInvalidID'
         '404':
           description: Publisher does not exist with the given ID
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorPublisherDoesNotExist'
     delete:
       tags:
         - publishers
@@ -446,8 +589,18 @@ paths:
       responses:
         '204':
           description: Publisher has been successfully removed
+        '400':
+          description: Validation failed
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorInvalidID'
         '404':
-          description: Publisher does not exist with the given ID      
+          description: Publisher does not exist with the given ID
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorPublisherDoesNotExist'
     put:
       tags:
         - publishers
@@ -476,8 +629,18 @@ paths:
                 $ref: '#/components/schemas/PublisherDTO'
         '400':
           description: Validation failed
+          content:
+            text:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorNameIsRequired'
+                  - $ref: '#/components/schemas/ErrorUnknownProperty'
         '404':
-          description: Publisher does not exist with the given ID                
+          description: Publisher does not exist with the given ID
+          content:
+            text:
+              schema:
+                $ref: '#/components/schemas/ErrorPublisherDoesNotExist'
 components:
   schemas:
     AuthorDTO:
@@ -562,7 +725,7 @@ components:
         publicationDate:
           type: string
           description: Publication date of the book
-          example: 2015-07-01
+          example: 2015-07-01T00:00:00.000Z
         publishers:
           type: array
           items:
@@ -573,7 +736,9 @@ components:
         title:
           type: string
           description: Title of the book
-          example: 'Cracking the Coding Interview, 6th Edition: 189 Programming Questions and Solutions'
+          example: >-
+            Cracking the Coding Interview, 6th Edition: 189 Programming
+            Questions and Solutions
     BookUpdateDTO:
       type: object
       properties:
@@ -629,6 +794,60 @@ components:
         name:
           type: string
           description: New name of the category
+    ErrorAuthorDoesNotExist:
+      type: string
+      example: 'Author with ID = 1 does not exist'
+    ErrorBookConflict:
+      type: string
+      example: 'A unique constraint violation occurred. Key (isbn_13) with value (1234567890123) already exists'
+    ErrorBookDoesNotExist:
+      type: string
+      example: 'Book with ID = 1 does not exist'
+    ErrorCategoryDoesNotExist:
+      type: string
+      example: 'Category with ID = 1 does not exist'
+    ErrorConstraintAuthor:
+      type: string
+      example: 'A foreign key constraint violation occurred. Author with ID = 1 does not exist'
+    ErrorConstraintCategory:
+      type: string
+      example: 'A foreign key constraint violation occurred. Category with ID = 1 does not exist'
+    ErrorConstraintPublisher:
+      type: string
+      example: 'A foreign key constraint violation occurred. Publisher with ID = 1 does not exist'
+    ErrorFirstNameIsRequired:
+      type: string
+      example: 'child "firstName" fails because ["firstName" is required]'
+    ErrorInvalidAuthorType:
+      type: string
+      example: 'child "authors" fails because ["authors" at position 1 fails because ["1" must be a number]]'
+    ErrorInvalidCategoryType:
+      type: string
+      example: 'child "categories" fails because ["categories" at position 1 fails because ["1" must be a number]]'
+    ErrorInvalidID:
+      type: string
+      example: '"id" must be a number'
+    ErrorInvalidPublisherType:
+      type: string
+      example: 'child "publishers" fails because ["publishers" at position 1 fails because ["1" must be a number]]'
+    ErrorISBN13IsRequired:
+      type: string
+      example: 'child "isbn13" fails because ["isbn13" is required]'
+    ErrorLastNameIsRequired:
+      type: string
+      example: 'child "lastName" fails because ["lastName" is required]'
+    ErrorNameIsRequired:
+      type: string
+      example: 'child "name" fails because ["name" is required]'
+    ErrorPublisherDoesNotExist:
+      type: string
+      example: 'Publisher with ID = 1 does not exist'
+    ErrorTitleIsRequired:
+      type: string
+      example: 'child "title" fails because ["title" is required]'
+    ErrorUnknownProperty:
+      type: string
+      example: '"foo" is not allowed'
     NewAuthorDTO:
       type: object
       required:

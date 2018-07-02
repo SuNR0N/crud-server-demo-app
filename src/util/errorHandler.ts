@@ -1,14 +1,16 @@
 import { Response } from 'express';
 import {
   BAD_REQUEST,
+  CONFLICT,
   getStatusText,
   INTERNAL_SERVER_ERROR,
   NOT_FOUND,
 } from 'http-status-codes';
 
 import {
-  ConstraintViolationError,
   EntityNotFoundError,
+  ForeignKeyConstraintError,
+  UniqueConstraintError,
   ValidationError,
 } from '../errors';
 import { logger } from './logger';
@@ -19,11 +21,15 @@ export function errorHandler(error: any, response: Response): void {
       response.status(NOT_FOUND);
       response.send(error.message);
       break;
-    case ValidationError:
+    case ForeignKeyConstraintError:
       response.status(BAD_REQUEST);
       response.send(error.message);
       break;
-    case ConstraintViolationError:
+    case UniqueConstraintError:
+      response.status(CONFLICT);
+      response.send(error.message);
+      break;
+    case ValidationError:
       response.status(BAD_REQUEST);
       response.send(error.message);
       break;
@@ -36,14 +42,25 @@ export function errorHandler(error: any, response: Response): void {
 }
 
 export function dbErrorHandler(error: any): void {
-  const constraintViolationRegExp = /violates foreign key constraint/;
-  if (constraintViolationRegExp.test(error.message) && error.constraint) {
-    const detailRegExp = /^Key \(\w*\)=\((\d{1,})\) is not present in table "(\w*)".$/;
-    const detailRegExpExec = detailRegExp.exec(error.detail);
-    if (detailRegExpExec) {
-      throw new ConstraintViolationError(error.constraint, detailRegExpExec[1], detailRegExpExec[2]);
-    } else {
-      throw new ConstraintViolationError(error.constraint);
+  const foreignKeyConstraintRegExp = /violates foreign key constraint/;
+  const uniqueConstraintRegExp = /violates unique constraint/;
+  if (error.constraint) {
+    if (foreignKeyConstraintRegExp.test(error.message)) {
+      const detailRegExp = /^Key \(\w*\)=\((\d{1,})\) is not present in table "(\w*)".$/;
+      const detailRegExpExec = detailRegExp.exec(error.detail);
+      if (detailRegExpExec) {
+        throw new ForeignKeyConstraintError(error.constraint, detailRegExpExec[1], detailRegExpExec[2]);
+      } else {
+        throw new ForeignKeyConstraintError(error.constraint);
+      }
+    } else if (uniqueConstraintRegExp.test(error.message)) {
+      const detailRegExp = /^Key \((\w*)\)=\((\w*)\) already exists.$/;
+      const detailRegExpExec = detailRegExp.exec(error.detail);
+      if (detailRegExpExec) {
+        throw new UniqueConstraintError(error.constraint, detailRegExpExec[1], detailRegExpExec[2]);
+      } else {
+        throw new UniqueConstraintError(error.constraint);
+      }
     }
   }
 }

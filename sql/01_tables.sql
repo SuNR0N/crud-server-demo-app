@@ -1,7 +1,7 @@
 CREATE TABLE book (
   id SERIAL PRIMARY KEY NOT NULL,
   isbn_10 CHAR(10),
-  isbn_13 CHAR(13) NOT NULL,
+  isbn_13 CHAR(13) UNIQUE NOT NULL,
   title VARCHAR(255) NOT NULL,
   publication_date DATE
 );
