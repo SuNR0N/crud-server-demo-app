@@ -1,6 +1,9 @@
 setup:
-  config: {}
+  addons:
+  - plan: heroku-postgresql:hobby-dev
+    as: DATABASE
+  config: 
+    DATABASE_SSL: true
 build:
   docker:
     app: Dockerfile.app
-    db: Dockerfile.db
