@@ -24,7 +24,7 @@ You need to have the following programs installed on your machine:
 
 Build the custom PostgreSQL image with the SQL scripts:
 ```sh
-docker build -t my-postgres .
+docker build -t my-postgres -f Dockerfile.db .
 ```
 
 Run the docker container:
@@ -59,6 +59,9 @@ DATABASE_PASSWORD=pw
 
 # Port on which the database is running on
 DATABASE_PORT=5432
+
+# Specifies whether the database connection requires SSL or not
+DATABASE_SSL=false
 
 # User for the database
 DATABASE_USER=postgres

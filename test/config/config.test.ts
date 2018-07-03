@@ -82,6 +82,22 @@ describe('Configuration', () => {
     });
   });
 
+  describe('DATABASE_SSL', () => {
+    it('should be set to the parsed environment variable with the same name if defined', async () => {
+      process.env.DATABASE_SSL = 'true';
+      const { Configuration } = await import('../../src/config/config');
+
+      expect(Configuration.DATABASE_SSL).toBe(true);
+    });
+
+    it('should default to false if the environment variable does not exist', async () => {
+      delete process.env.DATABASE_SSL;
+      const { Configuration } = await import('../../src/config/config');
+
+      expect(Configuration.DATABASE_SSL).toBe(false);
+    });
+  });
+
   describe('DATABASE_USER', () => {
     it('should be set to the environment variable with the same name if defined', async () => {
       process.env.DATABASE_USER = 'user';

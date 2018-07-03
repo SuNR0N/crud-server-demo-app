@@ -1,8 +1,9 @@
 sudo: required
 
 language: node_js
+
 node_js:
-  - "8.11.3"
+  - 8.11.3
 
 services:
   - docker
@@ -19,3 +20,13 @@ jobs:
   include:
     - node_js: node
       script: jest --coverage --runInBand --coverageReporters=text-lcov | coveralls
+
+deploy:
+  provider: heroku
+  app: crud-server-demo-app
+  api_key:
+    secure: fgS8IpeG49NoK6WyQPSrCBhhJu/U8nPf3ROf6TlR9V5S3qBi4u/B7lBRd8cIFNAsDtzzXM34YJF2RjE8Qiud2sawKjRmrk3iGeMebjnOn2NdndPjwIdaCb5a2UJyetui0ANFtCGhfyfRH31G5GrDjxqJuBh1gRU6utEXc2AHmmyqEbJ4BpiPouwZRo7w3/JT/4vJhrpg1/UQz5cPvBc3V5buMjEhAD7VnqNbIHCxr6QsiIbH47sKskMafbKUWYAW0iB/U4FDViHjJWPwaHZkbe6tpIj5NNGUN9Q//WKGkg54xv/GUThA8yO/5z0/ZMyHxQi55Gu2tQ0EaKyTBwMa0lgsDmcEverj+Ca1hXTjhwtix77Z4HtzRlCTj4ZBmztJJ9J6c6ZAuoLh/V3In+c92IXqagB5cBONl7qRNTvPzqra3Atp3qYatyZ+prPUDtDbfd2Azns41bKNaQqQLspcj7uTzq0avcUFyByZbx/kJmrBegl8BO9zhsch9XXKjTzDeKG8govtxlGmKng07PHKVa2ykqEeMIRMI5hYfK3c5j3oMQcaZVAGjSuGYoYTMJnn5E2cC2EooE3Z4Xp0SF0nYKH9yLe13s0cfaRM65eEVZVPm1r8cULA37p58lDtPHp3xoqxPTO070Mbdxqy4rR65A8s1ffXVUHHUmoyAUygkOw=
+  on:
+    repo: SuNR0N/crud-server-demo-app
+  run:
+    - "heroku pg:reset"

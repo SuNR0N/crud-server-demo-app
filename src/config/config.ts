@@ -6,6 +6,7 @@ export interface IConfiguration {
   DATABASE_HOST: string;
   DATABASE_PASSWORD: string;
   DATABASE_PORT: number;
+  DATABASE_SSL: boolean;
   DATABASE_USER: string;
   ENVIRONMENT: string;
   PORT: number;
@@ -19,6 +20,7 @@ export const Configuration: IConfiguration = {
   DATABASE_HOST: process.env.DATABASE_HOST || 'localhost',
   DATABASE_PASSWORD: process.env.DATABASE_PASSWORD || 'pw',
   DATABASE_PORT: process.env.DATABASE_PORT ? Number(process.env.DATABASE_PORT) : 5432,
+  DATABASE_SSL: process.env.DATABASE_SSL === 'true',
   DATABASE_USER: process.env.DATABASE_USER || 'postgres',
   ENVIRONMENT: process.env.NODE_ENV || 'development',
   PORT: process.env.PORT ? Number(process.env.PORT) : 3000,
