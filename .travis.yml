@@ -14,3 +14,8 @@ before_install:
 
 env:
   - DATABASE_PORT=5437
+
+jobs:
+  include:
+    - node_js: node
+      script: jest --coverage --runInBand --coverageReporters=text-lcov | coveralls

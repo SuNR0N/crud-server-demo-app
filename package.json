@@ -51,6 +51,7 @@
     "@types/supertest": "^2.0.4",
     "@types/swagger-ui-express": "^3.0.0",
     "@types/yamljs": "^0.2.30",
+    "coveralls": "^3.0.2",
     "jest": "^23.2.0",
     "nodemon": "^1.17.5",
     "superagent": "^3.8.3",

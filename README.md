@@ -1,5 +1,8 @@
 # CRUD Server Demo Application
 
+[![Build Status](https://travis-ci.org/SuNR0N/crud-server-demo-app.svg?branch=master)](https://travis-ci.org/SuNR0N/crud-server-demo-app)
+[![Coverage Status](https://coveralls.io/repos/github/SuNR0N/crud-server-demo-app/badge.svg?branch=master)](https://coveralls.io/github/SuNR0N/crud-server-demo-app?branch=master)
+
 Table of Contents
 =================
 
@@ -118,9 +121,9 @@ Method #2:
 
 ## TODO
 
-- [ ] Set up Travis CI
-- [ ] Add build status badge
-- [ ] Add coverage badge
+- [X] Set up Travis CI
+- [X] Add build status badge
+- [X] Add coverage badge
 - [ ] Deploy the application to Heroku
 - [ ] Implement pagination for _getBooks_
 - [ ] Implement filtering for _getBooks_
