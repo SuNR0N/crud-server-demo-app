@@ -11,3 +11,6 @@ before_install:
   - docker build -t my-postgres .
   - docker run --name test-db --env-file .env -p 5437:5432 -d my-postgres
   - docker ps -a
+
+env:
+  - DATABASE_PORT=5437
