@@ -86,6 +86,9 @@ yarn test
 
 # With coverage report
 yarn test:coverage
+
+# With watch mode
+yarn test:watch
 ```
 
 ## API Documentation
