@@ -34,7 +34,7 @@ export class CategoryService implements ICategoryService {
     if (!category) {
       throw new EntityNotFoundError(Category, id);
     }
-    this.categoryRepository.delete(id);
+    await this.categoryRepository.delete(id);
   }
 
   public async getCategory(id: number): Promise<Category> {

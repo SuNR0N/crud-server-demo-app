@@ -34,7 +34,7 @@ export class PublisherService implements IPublisherService {
     if (!publisher) {
       throw new EntityNotFoundError(Publisher, id);
     }
-    this.publisherRepository.delete(id);
+    await this.publisherRepository.delete(id);
   }
 
   public async getPublisher(id: number): Promise<Publisher> {

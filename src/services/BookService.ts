@@ -43,7 +43,7 @@ export class BookService implements IBookService {
     if (!book) {
       throw new EntityNotFoundError(Book, id);
     }
-    this.bookRepository.delete(id);
+    await this.bookRepository.delete(id);
   }
 
   public async getBook(id: number): Promise<Book> {

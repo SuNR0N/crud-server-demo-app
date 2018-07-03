@@ -37,7 +37,7 @@ export class AuthorService implements IAuthorService {
     if (!author) {
       throw new EntityNotFoundError(Author, id);
     }
-    this.authorRepository.delete(id);
+    await this.authorRepository.delete(id);
   }
 
   public async getAuthor(id: number): Promise<Author> {
