@@ -1,13 +1,16 @@
 # CRUD Server Demo Application
 
 Table of Contents
+=================
 
 * [Prerequisites](#prerequisites)
 * [Install](#install)
+* [Environment Variables](#environment-variables)
 * [Run](#run)
 * [Test](#test)
 * [API Documentation](#api-documentation)
 * [Debug](#debug)
+* [TODO](#todo)
 
 ## Prerequisites
 
@@ -37,6 +40,31 @@ docker run -it --rm --link test-db:postgres my-postgres psql -h postgres -U post
 
 ```sh
 yarn
+```
+
+## Environment Variables
+
+```sh
+# Name of the database
+DATABASE_DB=testdb
+
+# Host on which the database is running on
+DATABASE_HOST=localhost
+
+# Password for the database
+DATABASE_PASSWORD=pw
+
+# Port on which the database is running on
+DATABASE_PORT=5432
+
+# User for the database
+DATABASE_USER=postgres
+
+# Environment in which the application is running 
+NODE_ENV=development
+
+# Port on which the Express server is running on
+PORT=3000
 ```
 
 ## Run
@@ -84,3 +112,14 @@ Method #2:
 3. Select the _Attach to Process_ debug configuration
 4. Click on _Start Debugging_
 5. Put a breakpoint in the code
+
+## TODO
+
+- [ ] Set up Travis CI
+- [ ] Add build status badge
+- [ ] Add coverage badge
+- [ ] Deploy the application to Heroku
+- [ ] Implement pagination for _getBooks_
+- [ ] Implement filtering for _getBooks_
+- [ ] Implement HATEOAS
+- [ ] Implement OAuth

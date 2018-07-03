@@ -19,7 +19,15 @@ describe('Configuration', () => {
   });
 
   describe('DATABASE_DB', () => {
-    it('should be set to "testdb"', async () => {
+    it('should be set to the environment variable with the same name if defined', async () => {
+      process.env.DATABASE_DB = 'test';
+      const { Configuration } = await import('../../src/config/config');
+
+      expect(Configuration.DATABASE_DB).toBe('test');
+    });
+
+    it('should default to "testdb" if the environment variable does not exist', async () => {
+      delete process.env.DATABASE_DB;
       const { Configuration } = await import('../../src/config/config');
 
       expect(Configuration.DATABASE_DB).toBe('testdb');
@@ -59,7 +67,15 @@ describe('Configuration', () => {
   });
 
   describe('DATABASE_PORT', () => {
-    it('should be set to 5432', async () => {
+    it('should be set to the parsed environment variable with the same name if defined', async () => {
+      process.env.DATABASE_PORT = '1234';
+      const { Configuration } = await import('../../src/config/config');
+
+      expect(Configuration.DATABASE_PORT).toBe(1234);
+    });
+
+    it('should default to 5432 if the environment variable does not exist', async () => {
+      delete process.env.DATABASE_PORT;
       const { Configuration } = await import('../../src/config/config');
 
       expect(Configuration.DATABASE_PORT).toBe(5432);
