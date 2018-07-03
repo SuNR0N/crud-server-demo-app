@@ -27,5 +27,3 @@ deploy:
   api_key: $HEROKU_AUTH_TOKEN
   on:
     repo: SuNR0N/crud-server-demo-app
-  run:
-    - "heroku pg:reset"
