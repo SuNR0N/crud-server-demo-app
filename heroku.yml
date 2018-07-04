@@ -1,11 +1,9 @@
 setup:
-  # addons:
-  # - plan: heroku-postgresql:hobby-dev
-  #   as: DATABASE
+  addons:
+  - plan: heroku-postgresql:hobby-dev
+    as: DATABASE
   config: 
-    DATABASE_HOST: db.crud-server-demo-app.app.localspace
-    # DATABASE_SSL: true
+    DATABASE_SSL: true
 build:
   docker:
     web: docker/app/Dockerfile
-    db: docker/db/Dockerfile

@@ -98,6 +98,22 @@ describe('Configuration', () => {
     });
   });
 
+  describe('DATABASE_URL', () => {
+    it('should be set to the environment variable with the same name if defined', async () => {
+      process.env.DATABASE_URL = 'postgresql://localhost/testdb?user=user&password=pw';
+      const { Configuration } = await import('../../src/config/config');
+
+      expect(Configuration.DATABASE_URL).toBe('postgresql://localhost/testdb?user=user&password=pw');
+    });
+
+    it('should default to undefined if the environment variable does not exist', async () => {
+      delete process.env.DATABASE_URL;
+      const { Configuration } = await import('../../src/config/config');
+
+      expect(Configuration.DATABASE_URL).toBeUndefined();
+    });
+  });
+
   describe('DATABASE_USER', () => {
     it('should be set to the environment variable with the same name if defined', async () => {
       process.env.DATABASE_USER = 'user';

@@ -1,5 +1,6 @@
 import {
   Connection,
+  ConnectionOptions,
   createConnection,
 } from 'typeorm';
 
@@ -20,17 +21,28 @@ export async function getDbConnection(): Promise<Connection> {
     Publisher,
   ];
 
-  const conn = await createConnection({
-    database: Configuration.DATABASE_DB,
+  const baseConnectionOptions: ConnectionOptions = {
     entities,
-    host: Configuration.DATABASE_HOST,
-    password: Configuration.DATABASE_PASSWORD,
-    port: Configuration.DATABASE_PORT,
     ssl: Configuration.DATABASE_SSL,
     synchronize: false,
     type: 'postgres',
-    username: Configuration.DATABASE_USER,
-  });
+  };
+
+  const connectionOptions: ConnectionOptions = Configuration.DATABASE_URL ?
+    {
+      ...baseConnectionOptions,
+      url: Configuration.DATABASE_URL,
+    } :
+    {
+      ...baseConnectionOptions,
+      database: Configuration.DATABASE_DB,
+      host: Configuration.DATABASE_HOST,
+      password: Configuration.DATABASE_PASSWORD,
+      port: Configuration.DATABASE_PORT,
+      username: Configuration.DATABASE_USER,
+    };
+
+  const conn = await createConnection(connectionOptions);
 
   return conn;
 }
