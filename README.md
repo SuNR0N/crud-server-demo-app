@@ -24,7 +24,7 @@ You need to have the following programs installed on your machine:
 
 Build the custom PostgreSQL image with the SQL scripts:
 ```sh
-docker build -t my-postgres -f Dockerfile.db .
+docker build -t my-postgres -f docker/db/Dockerfile .
 ```
 
 Run the docker container:

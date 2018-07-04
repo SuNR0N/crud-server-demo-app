@@ -1,9 +1,0 @@
-FROM node:10.5.0-alpine
-
-ARG DESTINATION_DIR=/home/app
-
-COPY . ${DESTINATION_DIR}/
-WORKDIR ${DESTINATION_DIR}/
-RUN yarn
-
-CMD yarn start

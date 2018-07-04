@@ -3,7 +3,7 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile.app
+      dockerfile: docker/app/Dockerfile
     ports:
       - "3000:3000"
     depends_on:
@@ -13,5 +13,5 @@ services:
   db:
     build:
       context: .
-      dockerfile: Dockerfile.db
+      dockerfile: docker/db/Dockerfile
     env_file: .env
