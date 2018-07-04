@@ -6,4 +6,4 @@ setup:
     DATABASE_SSL: true
 build:
   docker:
-    web: docker/app/Dockerfile
+    web: Dockerfile
