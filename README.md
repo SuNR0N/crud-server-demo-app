@@ -9,10 +9,14 @@ Table of Contents
 * [Prerequisites](#prerequisites)
 * [Install](#install)
 * [Environment Variables](#environment-variables)
+* [SQL](#sql)
 * [Run](#run)
 * [Test](#test)
 * [API Documentation](#api-documentation)
 * [Debug](#debug)
+* [Docker Compose](#docker-compose)
+* [Deployment](#deployment)
+* [Database Migration](#database-migration)
 * [TODO](#todo)
 
 ## Prerequisites
@@ -63,6 +67,9 @@ DATABASE_PORT=5432
 # Specifies whether the database connection requires SSL or not
 DATABASE_SSL=false
 
+# Connection string for the database which overrides other connection options if it is defined
+DATABASE_URL=
+
 # User for the database
 DATABASE_USER=postgres
 
@@ -72,6 +79,19 @@ NODE_ENV=development
 # Port on which the Express server is running on
 PORT=3000
 ```
+
+## SQL
+
+The SQL scripts which are being used to create the database schema and to populate it with initial data can be found under the `sql` directory:
+
+- _01_tables.sql_: Creates the _book_, _author_, _category_, _publisher_, _book_category_, _book_author_ and _book_publisher_ tables
+- _02_author.sql_: Populates the _author_ table with authors
+- _03_book.sql_: Populates the _book_ table with books
+- _04_category.sql_: Populates the _category_ table with categories
+- _05_publisher.sql_: Populates the _publisher_ table with publishers
+- _06_book_author.sql_: Creates many-to-many relationships between books and authors
+- _07_book_category.sql_: Creates many-to-many relationships between books and categories
+- _08_book_publisher.sql_: Creates many-to-many relationships between books and publishers
 
 ## Run
 
@@ -122,12 +142,71 @@ Method #2:
 4. Click on _Start Debugging_
 5. Put a breakpoint in the code
 
+## Docker Compose
+
+With the provided `docker-compose.yml` you can create a multi-container _Docker_ application in which the PostgreSQL database and the Node application will run in their own containers:
+
+```sh
+# Builds, (re)creates and starts the defined services
+docker-compose up
+
+# Stops the running services
+docker-compose down
+```
+
+## Deployment
+
+A successful _Travis_ build kicks off the deployment to _Heroku_ which is defined in the `.travis.yml`:
+
+```yaml
+deploy:
+  provider: heroku
+  app: $HEROKU_APP_NAME
+  api_key: $HEROKU_AUTH_TOKEN
+  on:
+    repo: SuNR0N/crud-server-demo-app
+```
+
+The configuration takes 2 environment variables:
+- _HEROKU_APP_NAME_: The name of your application in _Heroku_
+- _HEROKU_AUTH_TOKEN_: Your auth token to _Heroku_ what you can get with `heroku auth:token` if you have the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) installed
+
+_Heroku_ deploys the application based on the `heroku.yml` [build manifest](https://devcenter.heroku.com/articles/heroku-yml-build-manifest) file:
+
+```yaml
+setup:
+  addons:
+  - plan: heroku-postgresql:hobby-dev
+    as: DATABASE
+  config: 
+    DATABASE_SSL: true
+build:
+  docker:
+    web: Dockerfile
+release:
+  image: web
+```
+
+It specifies a _Heroku Postgres_ addon which will be our managed SQL database and it exposes the _DATABASE_URL_ by default for the available application containers (_dyno_) within the _Heroku_ application. Our dockerized Node application will run as a _dyno_ with process type _web_ therefore it will be able to receive HTTP traffic from the routers.
+
+_Note_: As far as I'm aware no build context can be specified for the targeted _Dockerfile_ within the manifest file and it defaults to the folder where the file is located
+
+## Database Migration
+
+Once our application is deployed to _Heroku_ we need to do the database migration which can be done by running the migration script:
+
+```sh
+./scripts/migrate.sh heroku-app-name [sql-directory]
+```
+
+_Note_: This step depends on the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) therefore it has to be installed on your machine
+
 ## TODO
 
 - [X] Set up Travis CI
 - [X] Add build status badge
 - [X] Add coverage badge
-- [ ] Deploy the application to Heroku
+- [X] Deploy the application to Heroku
 - [ ] Implement pagination for _getBooks_
 - [ ] Implement filtering for _getBooks_
 - [ ] Implement HATEOAS

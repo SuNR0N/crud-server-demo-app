@@ -23,7 +23,7 @@ jobs:
 
 deploy:
   provider: heroku
-  app: crud-server-demo-app
+  app: $HEROKU_APP_NAME
   api_key: $HEROKU_AUTH_TOKEN
   on:
     repo: SuNR0N/crud-server-demo-app

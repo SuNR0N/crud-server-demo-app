@@ -9,6 +9,3 @@ build:
     web: Dockerfile
 release:
   image: web
-  command:
-    - heroku pg:reset
-    - for D in ./sql/*; do heroku pg:psql < $D; done
