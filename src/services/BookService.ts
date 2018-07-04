@@ -17,7 +17,7 @@ export interface IBookService {
   createBook(newBook: NewBookDTO): Promise<Book>;
   deleteBook(id: number): Promise<void>;
   getBook(id: number): Promise<Book>;
-  getBooks(): Promise<Book[]>;
+  getBooks(offset: number, pageSize: number, query: string): Promise<[Book[], number]>;
   updateBook(id: number, book: BookUpdateDTO): Promise<Book>;
 }
 
@@ -54,8 +54,24 @@ export class BookService implements IBookService {
     return book;
   }
 
-  public getBooks(): Promise<Book[]> {
-    return this.bookRepository.find();
+  public async getBooks(offset: number, pageSize: number, query: string = ''): Promise<[Book[], number]> {
+    const paramLike = { query: `%${query.toLowerCase()}%` };
+    return await this.bookRepository
+      .createQueryBuilder('book')
+      .leftJoinAndSelect('book.authors', 'author')
+      .leftJoinAndSelect('book.categories', 'category')
+      .leftJoinAndSelect('book.publishers', 'publisher')
+      .where('LOWER(book.title) LIKE :query', paramLike)
+      .orWhere('LOWER(book.isbn10) LIKE :query', paramLike)
+      .orWhere('LOWER(book.isbn13) LIKE :query', paramLike)
+      .orWhere('LOWER(author.first_name) LIKE :query', paramLike)
+      .orWhere('LOWER(author.middle_name) LIKE :query', paramLike)
+      .orWhere('LOWER(author.last_name) LIKE :query', paramLike)
+      .orWhere('LOWER(category.name) LIKE :query', paramLike)
+      .orWhere('LOWER(publisher.name) LIKE :query', paramLike)
+      .skip(offset)
+      .take(pageSize)
+      .getManyAndCount();
   }
 
   public async updateBook(id: number, book: BookUpdateDTO): Promise<Book> {

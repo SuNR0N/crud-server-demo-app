@@ -10,6 +10,7 @@ import {
   httpGet,
   httpPatch,
   httpPost,
+  queryParam,
   request,
   requestBody,
   requestParam,
@@ -30,7 +31,7 @@ import { BookService } from '../services/BookService';
 import { errorHandler } from '../util/errorHandler';
 
 export interface IBookController {
-  getBooks(): Promise<BookDTO[]>;
+  getBooks(offset: number, pageSize: number, q: string): Promise<BookDTO[]>;
   getBook(id: number, res: Response): Promise<BookDTO | undefined>;
   createBook(newBook: INewBookDTO, req: Request, res: Response): Promise<void>;
   updateBook(id: number, bookUpdate: IBookUpdateDTO, res: Response): Promise<BookDTO | undefined>;
@@ -45,8 +46,12 @@ export class BookController implements IBookController {
   ) { }
 
   @httpGet('/')
-  public async getBooks(): Promise<BookDTO[]> {
-    const books = await this.bookService.getBooks();
+  public async getBooks(
+    @queryParam('offset') offset: number = 0,
+    @queryParam('page-size') pageSize: number = 10,
+    @queryParam('q') q: string,
+  ): Promise<BookDTO[]> {
+    const [books] = await this.bookService.getBooks(offset, pageSize, q);
     return books.map(BookDTO.toDTO);
   }
 

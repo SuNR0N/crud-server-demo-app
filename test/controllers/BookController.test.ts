@@ -25,7 +25,7 @@ describe('BookController', () => {
         .get('/api/v1/books');
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveLength(22);
+      expect(response.body).toHaveLength(10);
     });
   });
 

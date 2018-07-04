@@ -177,7 +177,25 @@ paths:
       summary: Get books
       operationId: getBooks
       description: |
-        Retrieves all the available books in the system
+        Retrieves the available books in the system in a paginated and filterable fashion
+      parameters: 
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Keyword to search for which matches on author/category/publisher names, isbn ids and title
+        - in: query
+          name: offset
+          schema:
+            type: number
+            default: 0
+          description: Pagination offset
+        - in: query
+          name: page-size
+          schema:
+            type: number
+            default: 10
+          description: Page size
       responses:
         '200':
           description: OK
