@@ -4,7 +4,7 @@ import {
 } from 'inversify';
 import { Repository } from 'typeorm';
 
-import { TYPES } from '../constants/types';
+import { Types } from '../constants/types';
 import { PublisherUpdateDTO } from '../dtos/PublisherUpdateDTO';
 import { Publisher } from '../entities/Publisher';
 import { EntityNotFoundError } from '../errors/EntityNotFoundError';
@@ -13,14 +13,14 @@ export interface IPublisherService {
   createPublisher(publisher: PublisherUpdateDTO): Promise<Publisher>;
   deletePublisher(id: number): Promise<void>;
   getPublisher(id: number): Promise<Publisher>;
-  getPublishers(): Promise<Publisher[]>;
+  getPublishers(query: string): Promise<Publisher[]>;
   updatePublisher(id: number, publisher: PublisherUpdateDTO): Promise<Publisher>;
 }
 
 @injectable()
 export class PublisherService implements IPublisherService {
   constructor(
-    @inject(TYPES.PublisherRepository)
+    @inject(Types.PublisherRepository)
     private readonly publisherRepository: Repository<Publisher>,
   ) { }
 
@@ -45,8 +45,12 @@ export class PublisherService implements IPublisherService {
     return publisher;
   }
 
-  public getPublishers(): Promise<Publisher[]> {
-    return this.publisherRepository.find();
+  public async getPublishers(query: string = ''): Promise<Publisher[]> {
+    const paramLike = { query: `%${query.toLowerCase()}%` };
+    return await this.publisherRepository
+      .createQueryBuilder('publisher')
+      .where('LOWER(publisher.name) LIKE :query', paramLike)
+      .getMany();
   }
 
   public async updatePublisher(id: number, publisher: PublisherUpdateDTO): Promise<Publisher> {

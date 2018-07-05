@@ -20,12 +20,38 @@ describe('CategoryController', () => {
   });
 
   describe('getCategories', () => {
-    it('should return all categories', async () => {
+    it('should return all categories by default', async () => {
       const response = await agent(serverInstance)
         .get('/api/v1/categories');
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveLength(32);
+    });
+
+    it('should return a category if there is a partial match on the name', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/categories')
+        .query({ q: 'echno' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          name: 'Computers & Technology',
+        }),
+      ]);
+    });
+
+    it('should return a category if there is a case insensitive match on the name', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/categories')
+        .query({ q: 'technology' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          name: 'Computers & Technology',
+        }),
+      ]);
     });
   });
 
@@ -54,7 +80,7 @@ describe('CategoryController', () => {
         .get('/api/v1/categories/foobar');
 
       expect(response.status).toBe(400);
-      expect(response.text).toBe('"id" must be a number');
+      expect(response.text).toBe("The path parameter 'id' must be a number");
     });
   });
 
@@ -65,7 +91,7 @@ describe('CategoryController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "name" fails because ["name" is required]');
+        .toEqual("The property 'name' is required");
     });
 
     it('should return a 400 if the request body contains unknown properties', async () => {
@@ -78,7 +104,7 @@ describe('CategoryController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('"foo" is not allowed');
+        .toEqual("The property 'foo' is not allowed");
     });
 
     describe('given it creates the category', () => {
@@ -121,7 +147,7 @@ describe('CategoryController', () => {
         .put('/api/v1/categories/foobar');
 
       expect(response.status).toBe(400);
-      expect(response.text).toBe('"id" must be a number');
+      expect(response.text).toBe("The path parameter 'id' must be a number");
     });
 
     it('should return a 400 if the name is missing', async () => {
@@ -130,7 +156,7 @@ describe('CategoryController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "name" fails because ["name" is required]');
+        .toEqual("The property 'name' is required");
     });
 
     it('should return a 400 if the request body contains unknown properties', async () => {
@@ -143,7 +169,7 @@ describe('CategoryController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('"foo" is not allowed');
+        .toEqual("The property 'foo' is not allowed");
     });
 
     it('should return the updated category if it succeeds', async () => {
@@ -167,7 +193,7 @@ describe('CategoryController', () => {
         .delete('/api/v1/categories/foobar');
 
       expect(response.status).toBe(400);
-      expect(response.text).toBe('"id" must be a number');
+      expect(response.text).toBe("The path parameter 'id' must be a number");
     });
 
     it('should return a 404 if no category exists with the provided id', async () => {

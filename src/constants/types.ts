@@ -1,4 +1,4 @@
-export const TYPES = {
+export const Types = {
   AuthorRepository: Symbol.for('AuthorRepository'),
   AuthorService: Symbol.for('AuthorService'),
   BookRepository: Symbol.for('BookRepository'),

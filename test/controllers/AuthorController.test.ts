@@ -20,12 +20,96 @@ describe('AuthorController', () => {
   });
 
   describe('getAuthors', () => {
-    it('should return all authors', async () => {
+    it('should return all authors by default', async () => {
       const response = await agent(serverInstance)
         .get('/api/v1/authors');
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveLength(28);
+    });
+
+    it('should return an author if there is a partial match on the first name', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/authors')
+        .query({ q: 'atha' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          firstName: 'Nathan',
+        }),
+        expect.objectContaining({
+          firstName: 'Nathan',
+        }),
+      ]);
+    });
+
+    it('should return an author if there is a case insensitive match on the first name', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/authors')
+        .query({ q: 'nathan' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          firstName: 'Nathan',
+        }),
+        expect.objectContaining({
+          firstName: 'Nathan',
+        }),
+      ]);
+    });
+
+    it('should return an author if there is a partial match on the middle name', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/authors')
+        .query({ q: 'akma' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          middleName: 'Laakmann',
+        }),
+      ]);
+    });
+
+    it('should return an author if there is a case insensitive match on the middle name', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/authors')
+        .query({ q: 'c.' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          middleName: 'C.',
+        }),
+      ]);
+    });
+
+    it('should return an author if there is a partial match on the last name', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/authors')
+        .query({ q: 'owl' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          lastName: 'Fowler',
+        }),
+      ]);
+    });
+
+    it('should return an author if there is a case insensitive match on the last name', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/authors')
+        .query({ q: 'simpson' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          lastName: 'Simpson',
+        }),
+      ]);
     });
   });
 
@@ -57,7 +141,7 @@ describe('AuthorController', () => {
         .get('/api/v1/authors/foobar');
 
       expect(response.status).toBe(400);
-      expect(response.text).toBe('"id" must be a number');
+      expect(response.text).toBe("The path parameter 'id' must be a number");
     });
   });
 
@@ -71,7 +155,7 @@ describe('AuthorController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "firstName" fails because ["firstName" is required]');
+        .toEqual("The property 'firstName' is required");
     });
 
     it('should return a 400 if the lastName is missing', async () => {
@@ -83,7 +167,7 @@ describe('AuthorController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "lastName" fails because ["lastName" is required]');
+        .toEqual("The property 'lastName' is required");
     });
 
     it('should return a 400 if the request body contains unknown properties', async () => {
@@ -97,7 +181,7 @@ describe('AuthorController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('"foo" is not allowed');
+        .toEqual("The property 'foo' is not allowed");
     });
 
     describe('given it creates the author', () => {
@@ -145,7 +229,7 @@ describe('AuthorController', () => {
         .patch('/api/v1/authors/foobar');
 
       expect(response.status).toBe(400);
-      expect(response.text).toBe('"id" must be a number');
+      expect(response.text).toBe("The path parameter 'id' must be a number");
     });
 
     it('should return a 400 if the request body contains unknown properties', async () => {
@@ -157,7 +241,7 @@ describe('AuthorController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('"foo" is not allowed');
+        .toEqual("The property 'foo' is not allowed");
     });
 
     it('should return the updated author if it succeeds', async () => {
@@ -185,7 +269,7 @@ describe('AuthorController', () => {
         .delete('/api/v1/authors/foobar');
 
       expect(response.status).toBe(400);
-      expect(response.text).toBe('"id" must be a number');
+      expect(response.text).toBe("The path parameter 'id' must be a number");
     });
 
     it('should return a 404 if no author exists with the provided id', async () => {

@@ -12,17 +12,33 @@ describe('BookService', () => {
   let bookService: BookService;
   let bookRepository: {
     create: jest.Mock,
+    createQueryBuilder: jest.Mock,
     delete: jest.Mock,
-    find: jest.Mock,
     findOne: jest.Mock,
     save: jest.Mock,
   };
+  let selectQueryBuilder: {
+    getManyAndCount: jest.Mock,
+    leftJoinAndSelect: jest.Mock,
+    orWhere: jest.Mock,
+    skip: jest.Mock,
+    take: jest.Mock,
+    where: jest.Mock,
+  };
 
   beforeEach(() => {
+    selectQueryBuilder = {
+      getManyAndCount: jest.fn(),
+      leftJoinAndSelect: jest.fn(() => selectQueryBuilder),
+      orWhere: jest.fn(() => selectQueryBuilder),
+      skip: jest.fn(() => selectQueryBuilder),
+      take: jest.fn(() => selectQueryBuilder),
+      where: jest.fn(() => selectQueryBuilder),
+    };
     bookRepository = {
       create: jest.fn(),
+      createQueryBuilder: jest.fn(() => selectQueryBuilder),
       delete: jest.fn(),
-      find: jest.fn(),
       findOne: jest.fn(),
       save: jest.fn(),
     };
@@ -108,14 +124,79 @@ describe('BookService', () => {
   });
 
   describe('getBooks', () => {
-    it.skip('should return all of the found entities in the repository', () => {
-      const bookEntities = [
-        {} as Book,
-        {} as Book,
-      ];
-      bookRepository.find.mockImplementationOnce(() => bookEntities);
+    const offset = 0;
+    const pageSize = 10;
+    const query = 'FoO';
 
-      // expect(bookService.getBooks()).toBe(bookEntities);
+    beforeEach(async () => {
+      await bookService.getBooks(offset, pageSize, query);
+    });
+
+    it('should call createQueryBuilder with "book"', () => {
+      expect(bookRepository.createQueryBuilder).toHaveBeenCalledWith('book');
+    });
+
+    it('should call leftJoinAndSelect with "book.authors" and "author" for the 1st time', () => {
+      expect(selectQueryBuilder.leftJoinAndSelect).toHaveBeenNthCalledWith(1, 'book.authors', 'author');
+    });
+
+    it('should call leftJoinAndSelect with "book.categories" and "category" for the 2nd time', () => {
+      expect(selectQueryBuilder.leftJoinAndSelect).toHaveBeenNthCalledWith(2, 'book.categories', 'category');
+    });
+
+    it('should call leftJoinAndSelect with "book.publishers" and "publisher" for the 3rd time', () => {
+      expect(selectQueryBuilder.leftJoinAndSelect).toHaveBeenNthCalledWith(3, 'book.publishers', 'publisher');
+    });
+
+    it('should call where with the proper condition on the title', () => {
+      expect(selectQueryBuilder.where).toBeCalledWith('LOWER(book.title) LIKE :query', { query: '%foo%'});
+    });
+
+    it('should call orWhere with the proper condition on the isbn10 for the 1st time', () => {
+      expect(selectQueryBuilder.orWhere)
+        .toHaveBeenNthCalledWith(1, 'LOWER(book.isbn10) LIKE :query', { query: '%foo%'});
+    });
+
+    it('should call orWhere with the proper condition on the isbn13 for the 2nd time', () => {
+      expect(selectQueryBuilder.orWhere)
+        .toHaveBeenNthCalledWith(2, 'LOWER(book.isbn13) LIKE :query', { query: '%foo%'});
+    });
+
+    it('should call orWhere with the proper condition on the first_name of author for the 3nd time', () => {
+      expect(selectQueryBuilder.orWhere)
+        .toHaveBeenNthCalledWith(3, 'LOWER(author.first_name) LIKE :query', { query: '%foo%'});
+    });
+
+    it('should call orWhere with the proper condition on the middle_name of author for the 4th time', () => {
+      expect(selectQueryBuilder.orWhere)
+        .toHaveBeenNthCalledWith(4, 'LOWER(author.middle_name) LIKE :query', { query: '%foo%'});
+    });
+
+    it('should call orWhere with the proper condition on the last_name of author for the 5th time', () => {
+      expect(selectQueryBuilder.orWhere)
+        .toHaveBeenNthCalledWith(5, 'LOWER(author.last_name) LIKE :query', { query: '%foo%'});
+    });
+
+    it('should call orWhere with the proper condition on the name of category for the 6th time', () => {
+      expect(selectQueryBuilder.orWhere)
+        .toHaveBeenNthCalledWith(6, 'LOWER(category.name) LIKE :query', { query: '%foo%'});
+    });
+
+    it('should call orWhere with the proper condition on the name of publisher for the 7th time', () => {
+      expect(selectQueryBuilder.orWhere)
+        .toHaveBeenNthCalledWith(7, 'LOWER(publisher.name) LIKE :query', { query: '%foo%'});
+    });
+
+    it('should call skip with the provided offset', () => {
+      expect(selectQueryBuilder.skip).toHaveBeenCalledWith(offset);
+    });
+
+    it('should call take with the provided pageSize', () => {
+      expect(selectQueryBuilder.take).toHaveBeenCalledWith(pageSize);
+    });
+
+    it('should call getManyAndCount', () => {
+      expect(selectQueryBuilder.getManyAndCount).toHaveBeenCalled();
     });
   });
 

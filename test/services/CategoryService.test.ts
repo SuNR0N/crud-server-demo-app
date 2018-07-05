@@ -8,17 +8,25 @@ describe('CategoryService', () => {
   let categoryService: CategoryService;
   let categoryRepository: {
     create: jest.Mock,
+    createQueryBuilder: jest.Mock,
     delete: jest.Mock,
-    find: jest.Mock,
     findOne: jest.Mock,
     save: jest.Mock,
   };
+  let selectQueryBuilder: {
+    getMany: jest.Mock,
+    where: jest.Mock,
+  };
 
   beforeEach(() => {
+    selectQueryBuilder = {
+      getMany: jest.fn(),
+      where: jest.fn(() => selectQueryBuilder),
+    };
     categoryRepository = {
       create: jest.fn(),
+      createQueryBuilder: jest.fn(() => selectQueryBuilder),
       delete: jest.fn(),
-      find: jest.fn(),
       findOne: jest.fn(),
       save: jest.fn(),
     };
@@ -79,14 +87,22 @@ describe('CategoryService', () => {
   });
 
   describe('getCategories', () => {
-    it('should return all of the found entities in the repository', () => {
-      const categoryEntities = [
-        {} as Category,
-        {} as Category,
-      ];
-      categoryRepository.find.mockImplementationOnce(() => categoryEntities);
+    const query = 'FoO';
 
-      expect(categoryService.getCategories()).toBe(categoryEntities);
+    beforeEach(async () => {
+      await categoryService.getCategories(query);
+    });
+
+    it('should call createQueryBuilder with "category"', () => {
+      expect(categoryRepository.createQueryBuilder).toHaveBeenCalledWith('category');
+    });
+
+    it('should call where with the proper condition on the name', () => {
+      expect(selectQueryBuilder.where).toBeCalledWith('LOWER(category.name) LIKE :query', { query: '%foo%'});
+    });
+
+    it('should call getMany', () => {
+      expect(selectQueryBuilder.getMany).toHaveBeenCalled();
     });
   });
 

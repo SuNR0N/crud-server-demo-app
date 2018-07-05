@@ -4,7 +4,7 @@ import {
 } from 'inversify';
 import { Repository } from 'typeorm';
 
-import { TYPES } from '../constants/types';
+import { Types } from '../constants/types';
 import { CategoryUpdateDTO } from '../dtos/CategoryUpdateDTO';
 import { Category } from '../entities/Category';
 import { EntityNotFoundError } from '../errors/EntityNotFoundError';
@@ -13,14 +13,14 @@ export interface ICategoryService {
   createCategory(category: CategoryUpdateDTO): Promise<Category>;
   deleteCategory(id: number): Promise<void>;
   getCategory(id: number): Promise<Category>;
-  getCategories(): Promise<Category[]>;
+  getCategories(query: string): Promise<Category[]>;
   updateCategory(id: number, category: CategoryUpdateDTO): Promise<Category>;
 }
 
 @injectable()
 export class CategoryService implements ICategoryService {
   constructor(
-    @inject(TYPES.CategoryRepository)
+    @inject(Types.CategoryRepository)
     private readonly categoryRepository: Repository<Category>,
   ) { }
 
@@ -45,8 +45,12 @@ export class CategoryService implements ICategoryService {
     return category;
   }
 
-  public getCategories(): Promise<Category[]> {
-    return this.categoryRepository.find();
+  public async getCategories(query: string = ''): Promise<Category[]> {
+    const paramLike = { query: `%${query.toLowerCase()}%` };
+    return await this.categoryRepository
+      .createQueryBuilder('category')
+      .where('LOWER(category.name) LIKE :query', paramLike)
+      .getMany();
   }
 
   public async updateCategory(id: number, category: CategoryUpdateDTO): Promise<Category> {

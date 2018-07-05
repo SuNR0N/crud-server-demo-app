@@ -8,17 +8,25 @@ describe('PublisherService', () => {
   let publisherService: PublisherService;
   let publisherRepository: {
     create: jest.Mock,
+    createQueryBuilder: jest.Mock,
     delete: jest.Mock,
-    find: jest.Mock,
     findOne: jest.Mock,
     save: jest.Mock,
   };
+  let selectQueryBuilder: {
+    getMany: jest.Mock,
+    where: jest.Mock,
+  };
 
   beforeEach(() => {
+    selectQueryBuilder = {
+      getMany: jest.fn(),
+      where: jest.fn(() => selectQueryBuilder),
+    };
     publisherRepository = {
       create: jest.fn(),
+      createQueryBuilder: jest.fn(() => selectQueryBuilder),
       delete: jest.fn(),
-      find: jest.fn(),
       findOne: jest.fn(),
       save: jest.fn(),
     };
@@ -78,15 +86,23 @@ describe('PublisherService', () => {
     });
   });
 
-  describe('getCategories', () => {
-    it('should return all of the found entities in the repository', () => {
-      const publisherEntities = [
-        {} as Publisher,
-        {} as Publisher,
-      ];
-      publisherRepository.find.mockImplementationOnce(() => publisherEntities);
+  describe('getPublishers', () => {
+    const query = 'FoO';
 
-      expect(publisherService.getPublishers()).toBe(publisherEntities);
+    beforeEach(async () => {
+      await publisherService.getPublishers(query);
+    });
+
+    it('should call createQueryBuilder with "publisher"', () => {
+      expect(publisherRepository.createQueryBuilder).toHaveBeenCalledWith('publisher');
+    });
+
+    it('should call where with the proper condition on the name', () => {
+      expect(selectQueryBuilder.where).toBeCalledWith('LOWER(publisher.name) LIKE :query', { query: '%foo%'});
+    });
+
+    it('should call getMany', () => {
+      expect(selectQueryBuilder.getMany).toHaveBeenCalled();
     });
   });
 

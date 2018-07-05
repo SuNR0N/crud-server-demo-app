@@ -4,7 +4,7 @@ import {
 } from 'inversify';
 import { Repository } from 'typeorm';
 
-import { TYPES } from '../constants/types';
+import { Types } from '../constants/types';
 import {
   BookUpdateDTO,
   NewBookDTO,
@@ -24,7 +24,7 @@ export interface IBookService {
 @injectable()
 export class BookService implements IBookService {
   constructor(
-    @inject(TYPES.BookRepository)
+    @inject(Types.BookRepository)
     private readonly bookRepository: Repository<Book>,
   ) { }
 

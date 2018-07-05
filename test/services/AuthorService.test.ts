@@ -11,17 +11,27 @@ describe('AuthorService', () => {
   let authorService: AuthorService;
   let authorRepository: {
     create: jest.Mock,
+    createQueryBuilder: jest.Mock,
     delete: jest.Mock,
-    find: jest.Mock,
     findOne: jest.Mock,
     save: jest.Mock,
   };
+  let selectQueryBuilder: {
+    getMany: jest.Mock,
+    orWhere: jest.Mock,
+    where: jest.Mock,
+  };
 
   beforeEach(() => {
+    selectQueryBuilder = {
+      getMany: jest.fn(),
+      orWhere: jest.fn(() => selectQueryBuilder),
+      where: jest.fn(() => selectQueryBuilder),
+    };
     authorRepository = {
       create: jest.fn(),
+      createQueryBuilder: jest.fn(() => selectQueryBuilder),
       delete: jest.fn(),
-      find: jest.fn(),
       findOne: jest.fn(),
       save: jest.fn(),
     };
@@ -84,14 +94,32 @@ describe('AuthorService', () => {
   });
 
   describe('getAuthors', () => {
-    it('should return all of the found entities in the repository', () => {
-      const authorEntities = [
-        {} as Author,
-        {} as Author,
-      ];
-      authorRepository.find.mockImplementationOnce(() => authorEntities);
+    const query = 'FoO';
 
-      expect(authorService.getAuthors()).toBe(authorEntities);
+    beforeEach(async () => {
+      await authorService.getAuthors(query);
+    });
+
+    it('should call createQueryBuilder with "author"', () => {
+      expect(authorRepository.createQueryBuilder).toHaveBeenCalledWith('author');
+    });
+
+    it('should call where with the proper condition on the first_name', () => {
+      expect(selectQueryBuilder.where).toBeCalledWith('LOWER(author.first_name) LIKE :query', { query: '%foo%'});
+    });
+
+    it('should call orWhere with the proper condition on the middle_name for the 1st time', () => {
+      expect(selectQueryBuilder.orWhere)
+        .toHaveBeenNthCalledWith(1, 'LOWER(author.middle_name) LIKE :query', { query: '%foo%'});
+    });
+
+    it('should call orWhere with the proper condition on the last_name for the 2nd time', () => {
+      expect(selectQueryBuilder.orWhere)
+        .toHaveBeenNthCalledWith(2, 'LOWER(author.last_name) LIKE :query', { query: '%foo%'});
+    });
+
+    it('should call getMany', () => {
+      expect(selectQueryBuilder.getMany).toHaveBeenCalled();
     });
   });
 

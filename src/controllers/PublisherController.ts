@@ -10,6 +10,7 @@ import {
   httpGet,
   httpPost,
   httpPut,
+  queryParam,
   request,
   requestBody,
   requestParam,
@@ -17,7 +18,10 @@ import {
 } from 'inversify-express-utils';
 import Joi from 'joi';
 
-import { TYPES } from '../constants/types';
+import {
+  Schemas,
+  Types,
+} from '../constants';
 import {
   IPublisherUpdateDTO,
   PublisherDTO,
@@ -28,7 +32,7 @@ import { PublisherService } from '../services/PublisherService';
 import { errorHandler } from '../util/errorHandler';
 
 export interface IPublisherController {
-  getCategories(): Promise<PublisherDTO[]>;
+  getPublishers(query: string, req: Request, res: Response): Promise<PublisherDTO[] | undefined>;
   getPublisher(id: number, res: Response): Promise<PublisherDTO | undefined>;
   createPublisher(newPublisher: IPublisherUpdateDTO, req: Request, res: Response): Promise<void>;
   updatePublisher(id: number, publisherUpdate: IPublisherUpdateDTO, res: Response): Promise<PublisherDTO | undefined>;
@@ -38,14 +42,26 @@ export interface IPublisherController {
 @controller('/publishers')
 export class PublisherController implements IPublisherController {
   constructor(
-    @inject(TYPES.PublisherService)
+    @inject(Types.PublisherService)
     private readonly publisherService: PublisherService,
   ) { }
 
   @httpGet('/')
-  public async getCategories(): Promise<PublisherDTO[]> {
-    const publishers = await this.publisherService.getPublishers();
-    return publishers.map(PublisherDTO.toDTO);
+  public async getPublishers(
+    @queryParam('q') query: string,
+    @request() req: Request,
+    @response() res: Response,
+  ): Promise<PublisherDTO[] | undefined> {
+    const validationResult = Joi.validate(req.query, Schemas.GetPublishersQuery);
+    try {
+      if (validationResult.error) {
+        throw new ValidationError(validationResult.error.message);
+      }
+      const publishers = await this.publisherService.getPublishers(query);
+      return publishers.map(PublisherDTO.toDTO);
+    } catch (error) {
+      errorHandler(error, res);
+    }
   }
 
   @httpGet('/:id')
@@ -53,11 +69,10 @@ export class PublisherController implements IPublisherController {
     @requestParam('id') id: number,
     @response() res: Response,
   ): Promise<PublisherDTO | undefined> {
-    const idSchema = Joi.number().label('id');
-    const result = Joi.validate(id, idSchema);
+    const validationResult = Joi.validate(id, Schemas.Id);
     try {
-      if (result.error) {
-        throw new ValidationError(result.error.message);
+      if (validationResult.error) {
+        throw new ValidationError(validationResult.error.message);
       }
       const publisher = await this.publisherService.getPublisher(id);
       return PublisherDTO.toDTO(publisher);
@@ -72,13 +87,10 @@ export class PublisherController implements IPublisherController {
     @request() req: Request,
     @response() res: Response,
   ): Promise<void> {
-    const newPublisherSchema = {
-      name: Joi.string().required(),
-    };
-    const result = Joi.validate(newPublisher, newPublisherSchema);
+    const validationResult = Joi.validate(newPublisher, Schemas.Publisher);
     try {
-      if (result.error) {
-        throw new ValidationError(result.error.message);
+      if (validationResult.error) {
+        throw new ValidationError(validationResult.error.message);
       }
       const createdPublisher = await this.publisherService.createPublisher(new PublisherUpdateDTO(newPublisher));
       res.location(`${req.originalUrl}/${createdPublisher.id}`);
@@ -94,17 +106,13 @@ export class PublisherController implements IPublisherController {
     @requestBody() publisherUpdate: IPublisherUpdateDTO,
     @response() res: Response,
   ): Promise<PublisherDTO | undefined> {
-    const idSchema = Joi.number().label('id');
-    const publisherUpdateSchema = {
-      name: Joi.string().required(),
-    };
-    const resultId = Joi.validate(id, idSchema);
-    const resultPublisherUpdate = Joi.validate(publisherUpdate, publisherUpdateSchema);
+    const validationResultId = Joi.validate(id, Schemas.Id);
+    const validationResultPublisherUpdate = Joi.validate(publisherUpdate, Schemas.Publisher);
     try {
-      if (resultId.error) {
-        throw new ValidationError(resultId.error.message);
-      } else if (resultPublisherUpdate.error) {
-        throw new ValidationError(resultPublisherUpdate.error.message);
+      if (validationResultId.error) {
+        throw new ValidationError(validationResultId.error.message);
+      } else if (validationResultPublisherUpdate.error) {
+        throw new ValidationError(validationResultPublisherUpdate.error.message);
       }
       const updatedPublisher = await this.publisherService.updatePublisher(id, new PublisherUpdateDTO(publisherUpdate));
       return PublisherDTO.toDTO(updatedPublisher);
@@ -118,11 +126,10 @@ export class PublisherController implements IPublisherController {
     @requestParam('id') id: number,
     @response() res: Response,
   ): Promise<void> {
-    const idSchema = Joi.number().label('id');
-    const result = Joi.validate(id, idSchema);
+    const validationResult = Joi.validate(id, Schemas.Id);
     try {
-      if (result.error) {
-        throw new ValidationError(result.error.message);
+      if (validationResult.error) {
+        throw new ValidationError(validationResult.error.message);
       }
       return await this.publisherService.deletePublisher(id);
     } catch (error) {

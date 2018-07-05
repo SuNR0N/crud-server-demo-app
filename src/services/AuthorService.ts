@@ -4,7 +4,7 @@ import {
 } from 'inversify';
 import { Repository } from 'typeorm';
 
-import { TYPES } from '../constants/types';
+import { Types } from '../constants/types';
 import {
   AuthorUpdateDTO,
   NewAuthorDTO,
@@ -16,14 +16,14 @@ export interface IAuthorService {
   createAuthor(author: NewAuthorDTO): Promise<Author>;
   deleteAuthor(id: number): Promise<void>;
   getAuthor(id: number): Promise<Author>;
-  getAuthors(): Promise<Author[]>;
+  getAuthors(query: string): Promise<Author[]>;
   updateAuthor(id: number, author: AuthorUpdateDTO): Promise<Author>;
 }
 
 @injectable()
 export class AuthorService implements IAuthorService {
   constructor(
-    @inject(TYPES.AuthorRepository)
+    @inject(Types.AuthorRepository)
     private readonly authorRepository: Repository<Author>,
   ) { }
 
@@ -48,8 +48,14 @@ export class AuthorService implements IAuthorService {
     return author;
   }
 
-  public getAuthors(): Promise<Author[]> {
-    return this.authorRepository.find();
+  public async getAuthors(query: string = ''): Promise<Author[]> {
+    const paramLike = { query: `%${query.toLowerCase()}%` };
+    return await this.authorRepository
+      .createQueryBuilder('author')
+      .where('LOWER(author.first_name) LIKE :query', paramLike)
+      .orWhere('LOWER(author.middle_name) LIKE :query', paramLike)
+      .orWhere('LOWER(author.last_name) LIKE :query', paramLike)
+      .getMany();
   }
 
   public async updateAuthor(id: number, author: AuthorUpdateDTO): Promise<Author> {

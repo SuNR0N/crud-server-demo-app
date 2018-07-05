@@ -207,7 +207,11 @@ _Note_: This step depends on the [Heroku CLI](https://devcenter.heroku.com/artic
 - [X] Add build status badge
 - [X] Add coverage badge
 - [X] Deploy the application to Heroku
-- [ ] Implement pagination for _getBooks_
-- [ ] Implement filtering for _getBooks_
+- [X] Implement pagination for _getBooks_
+- [X] Implement filtering for _getBooks_
+- [X] Implement filtering for _getAuthors_
+- [X] Implement filtering for _getCategories_
+- [X] Implement filtering for _getPublishers_
 - [ ] Implement HATEOAS
 - [ ] Implement OAuth
+- [ ] Increase test coverage

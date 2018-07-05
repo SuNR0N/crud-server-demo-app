@@ -26,7 +26,14 @@ paths:
       summary: Get authors
       operationId: getAuthors
       description: |
-        Retrieves all the available authors in the system
+        Retrieves the available authors in the system in a filterable fashion
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: |
+            Keyword to search for which matches on first/middle/last names
       responses:
         '200':
           description: OK
@@ -177,13 +184,16 @@ paths:
       summary: Get books
       operationId: getBooks
       description: |
-        Retrieves the available books in the system in a paginated and filterable fashion
-      parameters: 
+        Retrieves the available books in the system in a paginated and
+        filterable fashion
+      parameters:
         - in: query
           name: q
           schema:
             type: string
-          description: Keyword to search for which matches on author/category/publisher names, isbn ids and title
+          description: |
+            Keyword to search for which matches on author/category/publisher
+            names, isbn ids and title
         - in: query
           name: offset
           schema:
@@ -205,6 +215,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/BookDTO'
+        '400':
+          description: Validation failed
+          content:
+            text:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ErrorInvalidOffset'
+                  - $ref: '#/components/schemas/ErrorInvalidPageSize'
     post:
       tags:
         - books
@@ -364,7 +382,14 @@ paths:
       summary: Get categories
       operationId: getCategories
       description: |
-        Retrieves all the available categories in the system
+        Retrieves the available categories in the system in a filterable fashion
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: |
+            Keyword to search for which matches on names
       responses:
         '200':
           description: OK
@@ -515,7 +540,14 @@ paths:
       summary: Get publishers
       operationId: getPublishers
       description: |
-        Retrieves all the available publishers in the system
+        Retrieves the available publishers in the system in a filterable fashion
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: |
+            Keyword to search for which matches on names
       responses:
         '200':
           description: OK
@@ -813,58 +845,72 @@ components:
           description: New name of the category
     ErrorAuthorDoesNotExist:
       type: string
-      example: 'Author with ID = 1 does not exist'
+      example: Author with ID = 1 does not exist
     ErrorBookConflict:
       type: string
-      example: 'A unique constraint violation occurred. Key (isbn_13) with value (1234567890123) already exists'
+      example: |
+        A unique constraint violation occurred. Key (isbn_13) with value
+        (1234567890123) already exists
     ErrorBookDoesNotExist:
       type: string
-      example: 'Book with ID = 1 does not exist'
+      example: Book with ID = 1 does not exist
     ErrorCategoryDoesNotExist:
       type: string
-      example: 'Category with ID = 1 does not exist'
+      example: Category with ID = 1 does not exist
     ErrorConstraintAuthor:
       type: string
-      example: 'A foreign key constraint violation occurred. Author with ID = 1 does not exist'
+      example: |
+        A foreign key constraint violation occurred. Author with ID = 1 does not
+        exist
     ErrorConstraintCategory:
       type: string
-      example: 'A foreign key constraint violation occurred. Category with ID = 1 does not exist'
+      example: |
+        A foreign key constraint violation occurred. Category with ID = 1 does
+        not exist
     ErrorConstraintPublisher:
       type: string
-      example: 'A foreign key constraint violation occurred. Publisher with ID = 1 does not exist'
+      example: |
+        A foreign key constraint violation occurred. Publisher with ID = 1 does
+        not exist
     ErrorFirstNameIsRequired:
       type: string
-      example: 'child "firstName" fails because ["firstName" is required]'
+      example: The property 'firstName' is required
     ErrorInvalidAuthorType:
       type: string
-      example: 'child "authors" fails because ["authors" at position 1 fails because ["1" must be a number]]'
+      example: The property 'authors' must contain numbers only
     ErrorInvalidCategoryType:
       type: string
-      example: 'child "categories" fails because ["categories" at position 1 fails because ["1" must be a number]]'
+      example: The property 'categories' must contain numbers only
     ErrorInvalidID:
       type: string
-      example: '"id" must be a number'
+      example: The path parameter 'id' must be a number
+    ErrorInvalidOffset:
+      type: string
+      example: The query parameter 'offset' must be a number
+    ErrorInvalidPageSize:
+      type: string
+      example: The query parameter 'page-size' must be a number
     ErrorInvalidPublisherType:
       type: string
-      example: 'child "publishers" fails because ["publishers" at position 1 fails because ["1" must be a number]]'
+      example: The property 'publishers' must contain numbers only
     ErrorISBN13IsRequired:
       type: string
-      example: 'child "isbn13" fails because ["isbn13" is required]'
+      example: The property 'isbn13' is required
     ErrorLastNameIsRequired:
       type: string
-      example: 'child "lastName" fails because ["lastName" is required]'
+      example: The property 'lastName' is required
     ErrorNameIsRequired:
       type: string
-      example: 'child "name" fails because ["name" is required]'
+      example: The property 'name' is required
     ErrorPublisherDoesNotExist:
       type: string
-      example: 'Publisher with ID = 1 does not exist'
+      example: Publisher with ID = 1 does not exist
     ErrorTitleIsRequired:
       type: string
-      example: 'child "title" fails because ["title" is required]'
+      example: The property 'title' is required
     ErrorUnknownProperty:
       type: string
-      example: '"foo" is not allowed'
+      example: The property 'foo' is not allowed
     NewAuthorDTO:
       type: object
       required:

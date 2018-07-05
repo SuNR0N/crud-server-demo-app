@@ -20,12 +20,262 @@ describe('BookController', () => {
   });
 
   describe('getBooks', () => {
-    it('should return all books', async () => {
+    it('should return the first 10 results by default', async () => {
       const response = await agent(serverInstance)
         .get('/api/v1/books');
 
       expect(response.status).toBe(200);
-      expect(response.body).toHaveLength(10);
+      expect(response.body.map((book) => book.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    });
+
+    it('should take notice of the provided "offset"', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ offset: 5 });
+
+      expect(response.status).toBe(200);
+      expect(response.body.map((book) => book.id)).toEqual([6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+    });
+
+    it('should take notice of the provided "page-size"', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ 'page-size': 5 });
+
+      expect(response.status).toBe(200);
+      expect(response.body.map((book) => book.id)).toEqual([1, 2, 3, 4, 5]);
+    });
+
+    it('should return a 400 if the provided "offset" is invalid', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ offset: 'foo' });
+
+      expect(response.status).toBe(400);
+      expect(response.text).toBe("The query parameter 'offset' must be a number");
+    });
+
+    it('should return a 400 if the provided "page-size" is invalid', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ 'page-size': 'foo' });
+
+      expect(response.status).toBe(400);
+      expect(response.text).toBe("The query parameter 'page-size' must be a number");
+    });
+
+    it('should return a book if there is a partial match on the title', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: 'racl' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          title: 'OCA: Oracle Certified Associate Java SE 8 Programmer I Study Guide: Exam 1Z0-808',
+        }),
+        expect.objectContaining({
+          title: 'OCP: Oracle Certified Professional Java Se 8 Programmer II Study Guide: Exam 1Z0-809',
+        }),
+      ]);
+    });
+
+    it('should return a book if there is a case insensitive match on the title', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: 'oracle' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          title: 'OCA: Oracle Certified Associate Java SE 8 Programmer I Study Guide: Exam 1Z0-808',
+        }),
+        expect.objectContaining({
+          title: 'OCP: Oracle Certified Professional Java Se 8 Programmer II Study Guide: Exam 1Z0-809',
+        }),
+      ]);
+    });
+
+    it('should return a book if there is a partial match on the isbn10', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: '1774' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          isbn10: '0596517742',
+        }),
+      ]);
+    });
+
+    it('should return a book if there is a case insensitive match on the isbn10', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: '099134460x' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          isbn10: '099134460X',
+        }),
+      ]);
+    });
+
+    it('should return a book if there is a partial match on the isbn13', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: '4782' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          isbn13: '9780984782857',
+        }),
+      ]);
+    });
+
+    it('should return a book if there is a partial match on the first name of an author', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: 'atha' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          authors: expect.arrayContaining(['Nathan Murray']),
+        }),
+        expect.objectContaining({
+          authors: expect.arrayContaining(['Nathan Murray']),
+        }),
+        expect.objectContaining({
+          authors: expect.arrayContaining(['Nathan Rozentals']),
+        }),
+      ]);
+    });
+
+    it('should return a book if there is a case insensitive match on the first name of an author', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: 'nathan' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          authors: expect.arrayContaining(['Nathan Murray']),
+        }),
+        expect.objectContaining({
+          authors: expect.arrayContaining(['Nathan Murray']),
+        }),
+        expect.objectContaining({
+          authors: expect.arrayContaining(['Nathan Rozentals']),
+        }),
+      ]);
+    });
+
+    it('should return a book if there is a partial match on the middle name of an author', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: 'akma' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          authors: expect.arrayContaining(['Gayle Laakmann McDowell']),
+        }),
+      ]);
+    });
+
+    it('should return a book if there is a case insensitive match on the middle name of an author', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: 'c.' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          authors: expect.arrayContaining(['Robert C. Martin']),
+        }),
+      ]);
+    });
+
+    it('should return a book if there is a partial match on the last name of an author', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: 'owl' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          authors: expect.arrayContaining(['Susan Fowler']),
+        }),
+      ]);
+    });
+
+    it('should return a book if there is a case insensitive match on the last name of an author', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: 'simpson' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          authors: expect.arrayContaining(['Kyle Simpson']),
+        }),
+      ]);
+    });
+
+    it('should return a book if there is a partial match on the name of a category', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: 'pute' });
+
+      expect(response.status).toBe(200);
+      expect(response.body
+        .map((book) => book.categories)
+        .every((categories: string[]) => categories.includes('Computers & Technology')),
+      ).toBe(true);
+    });
+
+    it('should return a book if there is a case insensitive match on the name of a category', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: 'technology' });
+
+      expect(response.status).toBe(200);
+      expect(response.body
+        .map((book) => book.categories)
+        .every((categories: string[]) => categories.includes('Computers & Technology')),
+      ).toBe(true);
+    });
+
+    it('should return a book if there is a partial match on the name of a publisher', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: 'areer' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          publishers: expect.arrayContaining(['CareerCup']),
+        }),
+        expect.objectContaining({
+          publishers: expect.arrayContaining(['CareerMonk Publications']),
+        }),
+      ]);
+    });
+
+    it('should return a book if there is a case insensitive match on the name of a publisher', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ q: 'cup' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          publishers: expect.arrayContaining(['CareerCup']),
+        }),
+      ]);
     });
   });
 
@@ -66,7 +316,7 @@ describe('BookController', () => {
         .get('/api/v1/books/foobar');
 
       expect(response.status).toBe(400);
-      expect(response.text).toBe('"id" must be a number');
+      expect(response.text).toBe("The path parameter 'id' must be a number");
     });
   });
 
@@ -80,7 +330,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "isbn13" fails because ["isbn13" is required]');
+        .toEqual("The property 'isbn13' is required");
     });
 
     it('should return a 400 if the title is missing', async () => {
@@ -92,7 +342,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "title" fails because ["title" is required]');
+        .toEqual("The property 'title' is required");
     });
 
     it('should return a 400 if the request body contains unknown properties', async () => {
@@ -106,7 +356,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('"foo" is not allowed');
+        .toEqual("The property 'foo' is not allowed");
     });
 
     it('should return a 400 if a provided author does not exist', async () => {
@@ -140,7 +390,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "authors" fails because ["authors" at position 1 fails because ["1" must be a number]]');
+        .toEqual("The property 'authors' must contain numbers only");
     });
 
     it('should return a 400 if a provided category does not exist', async () => {
@@ -174,7 +424,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "categories" fails because ["categories" at position 1 fails because ["1" must be a number]]');
+        .toEqual("The property 'categories' must contain numbers only");
     });
 
     it('should return a 400 if a provided publisher does not exist', async () => {
@@ -208,7 +458,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "publishers" fails because ["publishers" at position 1 fails because ["1" must be a number]]');
+        .toEqual("The property 'publishers' must contain numbers only");
     });
 
     it('should return a 409 if a book already exists with the provided isbn13', async () => {
@@ -297,7 +547,7 @@ describe('BookController', () => {
         .patch('/api/v1/books/foobar');
 
       expect(response.status).toBe(400);
-      expect(response.text).toBe('"id" must be a number');
+      expect(response.text).toBe("The path parameter 'id' must be a number");
     });
 
     it('should return a 400 if the request body contains unknown properties', async () => {
@@ -309,7 +559,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('"foo" is not allowed');
+        .toEqual("The property 'foo' is not allowed");
     });
 
     it('should return a 400 if a provided author does not exist', async () => {
@@ -341,7 +591,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "authors" fails because ["authors" at position 1 fails because ["1" must be a number]]');
+        .toEqual("The property 'authors' must contain numbers only");
     });
 
     it('should return a 400 if a provided category does not exist', async () => {
@@ -371,7 +621,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "categories" fails because ["categories" at position 1 fails because ["1" must be a number]]');
+        .toEqual("The property 'categories' must contain numbers only");
     });
 
     it('should return a 400 if a provided publisher does not exist', async () => {
@@ -401,7 +651,7 @@ describe('BookController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "publishers" fails because ["publishers" at position 1 fails because ["1" must be a number]]');
+        .toEqual("The property 'publishers' must contain numbers only");
     });
 
     it('should return the updated publisher if it succeeds', async () => {
@@ -445,7 +695,7 @@ describe('BookController', () => {
         .delete('/api/v1/books/foobar');
 
       expect(response.status).toBe(400);
-      expect(response.text).toBe('"id" must be a number');
+      expect(response.text).toBe("The path parameter 'id' must be a number");
     });
 
     it('should return a 404 if no book exists with the provided id', async () => {

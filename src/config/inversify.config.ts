@@ -1,7 +1,7 @@
 import { AsyncContainerModule } from 'inversify';
 import { Repository } from 'typeorm';
 
-import { TYPES } from '../constants/types';
+import { Types } from '../constants/types';
 import { getDbConnection } from '../db';
 import {
   Author,
@@ -32,16 +32,16 @@ export const bindings = new AsyncContainerModule(async (bind) => {
   await require('../controllers/PublisherController');
 
   // Set up bindings
-  bind<AuthorService>(TYPES.AuthorService).to(AuthorService);
-  bind<BookService>(TYPES.BookService).to(BookService);
-  bind<CategoryService>(TYPES.CategoryService).to(CategoryService);
-  bind<PublisherService>(TYPES.PublisherService).to(PublisherService);
-  bind<Repository<Author>>(TYPES.AuthorRepository).toDynamicValue(() => getAuthorRepository())
+  bind<AuthorService>(Types.AuthorService).to(AuthorService);
+  bind<BookService>(Types.BookService).to(BookService);
+  bind<CategoryService>(Types.CategoryService).to(CategoryService);
+  bind<PublisherService>(Types.PublisherService).to(PublisherService);
+  bind<Repository<Author>>(Types.AuthorRepository).toDynamicValue(() => getAuthorRepository())
     .inRequestScope();
-  bind<Repository<Book>>(TYPES.BookRepository).toDynamicValue(() => getBookRepository())
+  bind<Repository<Book>>(Types.BookRepository).toDynamicValue(() => getBookRepository())
     .inRequestScope();
-  bind<Repository<Category>>(TYPES.CategoryRepository).toDynamicValue(() => getCategoryRepository())
+  bind<Repository<Category>>(Types.CategoryRepository).toDynamicValue(() => getCategoryRepository())
     .inRequestScope();
-  bind<Repository<Publisher>>(TYPES.PublisherRepository).toDynamicValue(() => getPublisherRepository())
+  bind<Repository<Publisher>>(Types.PublisherRepository).toDynamicValue(() => getPublisherRepository())
     .inRequestScope();
 });

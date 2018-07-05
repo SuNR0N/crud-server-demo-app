@@ -20,12 +20,44 @@ describe('PublisherController', () => {
   });
 
   describe('getPublishers', () => {
-    it('should return all publishers', async () => {
+    it('should return all publishers by default', async () => {
       const response = await agent(serverInstance)
         .get('/api/v1/publishers');
 
       expect(response.status).toBe(200);
       expect(response.body).toHaveLength(12);
+    });
+
+    it('should return a publisher if there is a partial match on the name', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/publishers')
+        .query({ q: 'ack' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          name: 'Fullstack.io',
+        }),
+        expect.objectContaining({
+          name: 'Packt Publishing',
+        }),
+      ]);
+    });
+
+    it('should return a publisher if there is a case insensitive match on the name', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/publishers')
+        .query({ q: 'career' });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([
+        expect.objectContaining({
+          name: 'CareerCup',
+        }),
+        expect.objectContaining({
+          name: 'CareerMonk Publications',
+        }),
+      ]);
     });
   });
 
@@ -54,7 +86,7 @@ describe('PublisherController', () => {
         .get('/api/v1/publishers/foobar');
 
       expect(response.status).toBe(400);
-      expect(response.text).toBe('"id" must be a number');
+      expect(response.text).toBe("The path parameter 'id' must be a number");
     });
   });
 
@@ -65,7 +97,7 @@ describe('PublisherController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "name" fails because ["name" is required]');
+        .toEqual("The property 'name' is required");
     });
 
     it('should return a 400 if the request body contains unknown properties', async () => {
@@ -78,7 +110,7 @@ describe('PublisherController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('"foo" is not allowed');
+        .toEqual("The property 'foo' is not allowed");
     });
 
     describe('given it creates the publisher', () => {
@@ -121,7 +153,7 @@ describe('PublisherController', () => {
         .put('/api/v1/publishers/foobar');
 
       expect(response.status).toBe(400);
-      expect(response.text).toBe('"id" must be a number');
+      expect(response.text).toBe("The path parameter 'id' must be a number");
     });
 
     it('should return a 400 if the name is missing', async () => {
@@ -130,7 +162,7 @@ describe('PublisherController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('child "name" fails because ["name" is required]');
+        .toEqual("The property 'name' is required");
     });
 
     it('should return a 400 if the request body contains unknown properties', async () => {
@@ -143,7 +175,7 @@ describe('PublisherController', () => {
 
       expect(response.status).toBe(400);
       expect(response.text)
-        .toEqual('"foo" is not allowed');
+        .toEqual("The property 'foo' is not allowed");
     });
 
     it('should return the updated publisher if it succeeds', async () => {
@@ -167,7 +199,7 @@ describe('PublisherController', () => {
         .delete('/api/v1/publishers/foobar');
 
       expect(response.status).toBe(400);
-      expect(response.text).toBe('"id" must be a number');
+      expect(response.text).toBe("The path parameter 'id' must be a number");
     });
 
     it('should return a 404 if no publisher exists with the provided id', async () => {
