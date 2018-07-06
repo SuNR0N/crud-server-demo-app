@@ -212,6 +212,6 @@ _Note_: This step depends on the [Heroku CLI](https://devcenter.heroku.com/artic
 - [X] Implement filtering for _getAuthors_
 - [X] Implement filtering for _getCategories_
 - [X] Implement filtering for _getPublishers_
-- [ ] Implement HATEOAS
+- [X] Implement HATEOAS
 - [ ] Implement OAuth
 - [ ] Increase test coverage
