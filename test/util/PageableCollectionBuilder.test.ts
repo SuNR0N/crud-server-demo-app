@@ -6,19 +6,22 @@ describe('PageableCollectionBuilder', () => {
   describe('constructor', () => {
     it('should throw an error if the provided offset is not an integer', () => {
       expect(() => {
-        const builder = new PageableCollectionBuilder([], {} as Request, 0.5, 10, 25);
+        // tslint:disable-next-line:no-unused-expression
+        new PageableCollectionBuilder([], {} as Request, 0.5, 10, 25);
       }).toThrow('Invalid arguments. "offset", "pageSize" and "total" arguments must be integers.');
     });
 
     it('should throw an error if the provided pageSize is not an integer', () => {
       expect(() => {
-        const builder = new PageableCollectionBuilder([], {} as Request, 0, 10.5, 25);
+        // tslint:disable-next-line:no-unused-expression
+        new PageableCollectionBuilder([], {} as Request, 0, 10.5, 25);
       }).toThrow('Invalid arguments. "offset", "pageSize" and "total" arguments must be integers.');
     });
 
     it('should throw an error if the provided total is not an integer', () => {
       expect(() => {
-        const builder = new PageableCollectionBuilder([], {} as Request, 0, 10, 25.5);
+        // tslint:disable-next-line:no-unused-expression
+        new PageableCollectionBuilder([], {} as Request, 0, 10, 25.5);
       }).toThrow('Invalid arguments. "offset", "pageSize" and "total" arguments must be integers.');
     });
 
