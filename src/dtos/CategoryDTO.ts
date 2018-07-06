@@ -1,6 +1,9 @@
+import { Configuration } from '../config';
 import { Category } from '../entities/Category';
+import { ResourceBuilder } from '../util/ResourceBuilder';
+import { IResourceDTO } from './ResourceDTO';
 
-export interface ICategoryDTO {
+export interface ICategoryDTO extends IResourceDTO {
   id: number | null;
   name: string | null;
 }
@@ -11,7 +14,11 @@ export class CategoryDTO implements ICategoryDTO {
       id: entity.id,
       name: entity.name,
     };
-    return new CategoryDTO(data);
+    return new ResourceBuilder<ICategoryDTO>(CategoryDTO, data)
+      .addLink('self', `${Configuration.ROOT_PATH}/categories/${data.id}`)
+      .addLink('delete', `${Configuration.ROOT_PATH}/categories/${data.id}`, 'DELETE')
+      .addLink('update', `${Configuration.ROOT_PATH}/categories/${data.id}`, 'PUT')
+      .build();
   }
 
   public id: number | null;

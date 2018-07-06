@@ -1,38 +1,45 @@
-import { BookDTO } from '../../src/dtos/BookDTO';
+import {
+  BookDTO,
+  IBookDTO,
+} from '../../src/dtos/BookDTO';
 import { Book } from '../../src/entities/Book';
 
 describe('BookDTO', () => {
   describe('toDTO', () => {
-    it('should map the entity to DTO', () => {
-      const book = {
-        authors: [
-          {
-            first_name: 'John',
-            last_name: 'Doe',
-            middle_name: 'X',
-          },
-          {
-            first_name: 'Jane',
-            last_name: 'Doe',
-          },
-        ],
-        categories: [
-          { name: 'Fantasy' },
-          { name: 'Novel' },
-        ],
-        id: 1,
-        isbn10: '1234567890',
-        isbn13: '123456789123',
-        publicationDate: '2001-02-03',
-        publishers: [
-          { name: 'Foo' },
-          { name: 'Bar' },
-        ],
-        title: 'FooBar',
-      } as Book;
-      const dto = BookDTO.toDTO(book);
+    const book = {
+      authors: [
+        {
+          first_name: 'John',
+          last_name: 'Doe',
+          middle_name: 'X',
+        },
+        {
+          first_name: 'Jane',
+          last_name: 'Doe',
+        },
+      ],
+      categories: [
+        { name: 'Fantasy' },
+        { name: 'Novel' },
+      ],
+      id: 1,
+      isbn10: '1234567890',
+      isbn13: '123456789123',
+      publicationDate: '2001-02-03',
+      publishers: [
+        { name: 'Foo' },
+        { name: 'Bar' },
+      ],
+      title: 'FooBar',
+    } as Book;
+    let dto: IBookDTO;
 
-      expect(dto).toEqual({
+    beforeEach(() => {
+      dto = BookDTO.toDTO(book);
+    });
+
+    it('should map the entity to DTO', () => {
+      expect(dto).toEqual(expect.objectContaining({
         authors: [
           'John X Doe',
           'Jane Doe',
@@ -50,11 +57,11 @@ describe('BookDTO', () => {
           'Bar',
         ],
         title: 'FooBar',
-      });
+      }));
     });
 
     it('should map the entity to DTO if relationships do not exist', () => {
-      const book = {
+      const bookWithoutRelationships = {
         authors: null,
         categories: null,
         id: 1,
@@ -64,9 +71,9 @@ describe('BookDTO', () => {
         publishers: null,
         title: 'FooBar',
       } as any as Book;
-      const dto = BookDTO.toDTO(book);
+      const dtoWithoutRelationships = BookDTO.toDTO(bookWithoutRelationships);
 
-      expect(dto).toEqual({
+      expect(dtoWithoutRelationships).toEqual(expect.objectContaining({
         authors: [],
         categories: [],
         id: 1,
@@ -75,7 +82,37 @@ describe('BookDTO', () => {
         publicationDate: '2001-02-03',
         publishers: [],
         title: 'FooBar',
-      });
+      }));
+    });
+
+    it('should add the "self" link', () => {
+      expect(dto._links).toHaveProperty(
+        'self',
+        {
+          href: '/api/v1/books/1',
+          method: 'GET',
+        },
+      );
+    });
+
+    it('should add the "delete" link', () => {
+      expect(dto._links).toHaveProperty(
+        'delete',
+        {
+          href: '/api/v1/books/1',
+          method: 'DELETE',
+        },
+      );
+    });
+
+    it('should add the "update" link', () => {
+      expect(dto._links).toHaveProperty(
+        'update',
+        {
+          href: '/api/v1/books/1',
+          method: 'PATCH',
+        },
+      );
     });
   });
 

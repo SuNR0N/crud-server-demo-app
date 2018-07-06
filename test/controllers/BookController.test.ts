@@ -25,7 +25,7 @@ describe('BookController', () => {
         .get('/api/v1/books');
 
       expect(response.status).toBe(200);
-      expect(response.body.map((book) => book.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      expect(response.body.content.map((book) => book.id)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
 
     it('should take notice of the provided "offset"', async () => {
@@ -34,7 +34,7 @@ describe('BookController', () => {
         .query({ offset: 5 });
 
       expect(response.status).toBe(200);
-      expect(response.body.map((book) => book.id)).toEqual([6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+      expect(response.body.content.map((book) => book.id)).toEqual([6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
     });
 
     it('should take notice of the provided "page-size"', async () => {
@@ -43,7 +43,7 @@ describe('BookController', () => {
         .query({ 'page-size': 5 });
 
       expect(response.status).toBe(200);
-      expect(response.body.map((book) => book.id)).toEqual([1, 2, 3, 4, 5]);
+      expect(response.body.content.map((book) => book.id)).toEqual([1, 2, 3, 4, 5]);
     });
 
     it('should return a 400 if the provided "offset" is invalid', async () => {
@@ -70,7 +70,7 @@ describe('BookController', () => {
         .query({ q: 'racl' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([
+      expect(response.body.content).toEqual([
         expect.objectContaining({
           title: 'OCA: Oracle Certified Associate Java SE 8 Programmer I Study Guide: Exam 1Z0-808',
         }),
@@ -86,7 +86,7 @@ describe('BookController', () => {
         .query({ q: 'oracle' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([
+      expect(response.body.content).toEqual([
         expect.objectContaining({
           title: 'OCA: Oracle Certified Associate Java SE 8 Programmer I Study Guide: Exam 1Z0-808',
         }),
@@ -102,7 +102,7 @@ describe('BookController', () => {
         .query({ q: '1774' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([
+      expect(response.body.content).toEqual([
         expect.objectContaining({
           isbn10: '0596517742',
         }),
@@ -115,7 +115,7 @@ describe('BookController', () => {
         .query({ q: '099134460x' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([
+      expect(response.body.content).toEqual([
         expect.objectContaining({
           isbn10: '099134460X',
         }),
@@ -128,7 +128,7 @@ describe('BookController', () => {
         .query({ q: '4782' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([
+      expect(response.body.content).toEqual([
         expect.objectContaining({
           isbn13: '9780984782857',
         }),
@@ -141,7 +141,7 @@ describe('BookController', () => {
         .query({ q: 'atha' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([
+      expect(response.body.content).toEqual([
         expect.objectContaining({
           authors: expect.arrayContaining(['Nathan Murray']),
         }),
@@ -160,7 +160,7 @@ describe('BookController', () => {
         .query({ q: 'nathan' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([
+      expect(response.body.content).toEqual([
         expect.objectContaining({
           authors: expect.arrayContaining(['Nathan Murray']),
         }),
@@ -179,7 +179,7 @@ describe('BookController', () => {
         .query({ q: 'akma' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([
+      expect(response.body.content).toEqual([
         expect.objectContaining({
           authors: expect.arrayContaining(['Gayle Laakmann McDowell']),
         }),
@@ -192,7 +192,7 @@ describe('BookController', () => {
         .query({ q: 'c.' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([
+      expect(response.body.content).toEqual([
         expect.objectContaining({
           authors: expect.arrayContaining(['Robert C. Martin']),
         }),
@@ -205,7 +205,7 @@ describe('BookController', () => {
         .query({ q: 'owl' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([
+      expect(response.body.content).toEqual([
         expect.objectContaining({
           authors: expect.arrayContaining(['Susan Fowler']),
         }),
@@ -218,7 +218,7 @@ describe('BookController', () => {
         .query({ q: 'simpson' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([
+      expect(response.body.content).toEqual([
         expect.objectContaining({
           authors: expect.arrayContaining(['Kyle Simpson']),
         }),
@@ -231,7 +231,7 @@ describe('BookController', () => {
         .query({ q: 'pute' });
 
       expect(response.status).toBe(200);
-      expect(response.body
+      expect(response.body.content
         .map((book) => book.categories)
         .every((categories: string[]) => categories.includes('Computers & Technology')),
       ).toBe(true);
@@ -243,7 +243,7 @@ describe('BookController', () => {
         .query({ q: 'technology' });
 
       expect(response.status).toBe(200);
-      expect(response.body
+      expect(response.body.content
         .map((book) => book.categories)
         .every((categories: string[]) => categories.includes('Computers & Technology')),
       ).toBe(true);
@@ -255,7 +255,7 @@ describe('BookController', () => {
         .query({ q: 'areer' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([
+      expect(response.body.content).toEqual([
         expect.objectContaining({
           publishers: expect.arrayContaining(['CareerCup']),
         }),
@@ -271,7 +271,7 @@ describe('BookController', () => {
         .query({ q: 'cup' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual([
+      expect(response.body.content).toEqual([
         expect.objectContaining({
           publishers: expect.arrayContaining(['CareerCup']),
         }),
@@ -280,26 +280,62 @@ describe('BookController', () => {
   });
 
   describe('getBook', () => {
-    it('should return the book if one exists with the provided id', async () => {
-      const response = await agent(serverInstance)
-        .get('/api/v1/books/1');
+    describe('given a book exists with the provided id', () => {
+      let response: Response;
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({
-        authors: [
-          'Robert C. Martin',
-        ],
-        categories: [
-          'Computers & Technology',
-        ],
-        id: 1,
-        isbn10: '0132350882',
-        isbn13: '9780132350884',
-        publicationDate: '2008-08-11',
-        publishers: [
-          'Prentice Hall',
-        ],
-        title: 'Clean Code: A Handbook of Agile Software Craftsmanship',
+      beforeAll(async () => {
+        response = await agent(serverInstance)
+          .get('/api/v1/books/1');
+      });
+
+      it('should return the properties of the book', () => {
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(expect.objectContaining({
+          authors: [
+            'Robert C. Martin',
+          ],
+          categories: [
+            'Computers & Technology',
+          ],
+          id: 1,
+          isbn10: '0132350882',
+          isbn13: '9780132350884',
+          publicationDate: '2008-08-11',
+          publishers: [
+            'Prentice Hall',
+          ],
+          title: 'Clean Code: A Handbook of Agile Software Craftsmanship',
+        }));
+      });
+
+      it('should return a "self" link', () => {
+        expect(response.body._links).toHaveProperty(
+          'self',
+          {
+            href: '/api/v1/books/1',
+            method: 'GET',
+          },
+        );
+      });
+
+      it('should return an "update" link', () => {
+        expect(response.body._links).toHaveProperty(
+          'update',
+          {
+            href: '/api/v1/books/1',
+            method: 'PATCH',
+          },
+        );
+      });
+
+      it('should return a "delete" link', () => {
+        expect(response.body._links).toHaveProperty(
+          'delete',
+          {
+            href: '/api/v1/books/1',
+            method: 'DELETE',
+          },
+        );
       });
     });
 
@@ -517,7 +553,7 @@ describe('BookController', () => {
           .get(response.header.location);
 
         expect(getResponse.status).toBe(200);
-        expect(getResponse.body).toEqual({
+        expect(getResponse.body).toEqual(expect.objectContaining({
           authors: [
             'Aaron Frost',
             'Al Sweigart',
@@ -536,7 +572,7 @@ describe('BookController', () => {
             "O'Reilly Media",
           ],
           title: 'FooBar',
-        });
+        }));
       });
     });
   });
@@ -669,7 +705,7 @@ describe('BookController', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({
+      expect(response.body).toEqual(expect.objectContaining({
         authors: [
           'Aaron Frost',
           'Al Sweigart',
@@ -685,7 +721,7 @@ describe('BookController', () => {
           'Addison Wesley',
         ],
         title: 'FooBar',
-      });
+      }));
     });
   });
 

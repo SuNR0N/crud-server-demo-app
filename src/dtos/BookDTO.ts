@@ -1,11 +1,14 @@
+import { Configuration } from '../config';
 import {
   Book,
   Category,
   Publisher,
 } from '../entities';
+import { ResourceBuilder } from '../util/ResourceBuilder';
 import { fullNameMapper } from './AuthorDTO';
+import { IResourceDTO } from './ResourceDTO';
 
-export interface IBookDTO {
+export interface IBookDTO extends IResourceDTO {
   authors: string[];
   categories: string[];
   id: number | null;
@@ -36,7 +39,11 @@ export class BookDTO implements IBookDTO {
       publishers: (entity.publishers || []).map(publisherMapper),
       title: entity.title,
     };
-    return new BookDTO(data);
+    return new ResourceBuilder<IBookDTO>(BookDTO, data)
+      .addLink('self', `${Configuration.ROOT_PATH}/books/${data.id}`)
+      .addLink('delete', `${Configuration.ROOT_PATH}/books/${data.id}`, 'DELETE')
+      .addLink('update', `${Configuration.ROOT_PATH}/books/${data.id}`, 'PATCH')
+      .build();
   }
 
   public authors: string[];

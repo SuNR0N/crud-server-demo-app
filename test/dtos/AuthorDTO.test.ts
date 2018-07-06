@@ -1,6 +1,7 @@
 import {
   AuthorDTO,
   fullNameMapper,
+  IAuthorDTO,
 } from '../../src/dtos/AuthorDTO';
 import { Author } from '../../src/entities/Author';
 
@@ -29,22 +30,56 @@ describe('AuthorDTO', () => {
   });
 
   describe('toDTO', () => {
-    it('should map the entity to DTO', () => {
-      const author = {
-        first_name: 'John',
-        id: 1,
-        last_name: 'Doe',
-        middle_name: 'X',
-      } as Author;
-      const dto = AuthorDTO.toDTO(author);
+    const author = {
+      first_name: 'John',
+      id: 1,
+      last_name: 'Doe',
+      middle_name: 'X',
+    } as Author;
+    let dto: IAuthorDTO;
 
-      expect(dto).toEqual({
+    beforeEach(() => {
+      dto = AuthorDTO.toDTO(author);
+    });
+
+    it('should map the entity to DTO', () => {
+      expect(dto).toEqual(expect.objectContaining({
         firstName: 'John',
         fullName: 'John X Doe',
         id: 1,
         lastName: 'Doe',
         middleName: 'X',
-      });
+      }));
+    });
+
+    it('should add the "self" link', () => {
+      expect(dto._links).toHaveProperty(
+        'self',
+        {
+          href: '/api/v1/authors/1',
+          method: 'GET',
+        },
+      );
+    });
+
+    it('should add the "delete" link', () => {
+      expect(dto._links).toHaveProperty(
+        'delete',
+        {
+          href: '/api/v1/authors/1',
+          method: 'DELETE',
+        },
+      );
+    });
+
+    it('should add the "update" link', () => {
+      expect(dto._links).toHaveProperty(
+        'update',
+        {
+          href: '/api/v1/authors/1',
+          method: 'PATCH',
+        },
+      );
     });
   });
 

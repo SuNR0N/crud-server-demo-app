@@ -27,15 +27,19 @@ import {
   BookUpdateDTO,
   IBookUpdateDTO,
   INewBookDTO,
+  IPageableCollectionDTO,
   NewBookDTO,
 } from '../dtos';
 import { ValidationError } from '../errors/ValidationError';
 import { BookService } from '../services/BookService';
-import { errorHandler } from '../util/errorHandler';
+import {
+  errorHandler,
+  PageableCollectionBuilder,
+} from '../util';
 
 export interface IBookController {
   // tslint:disable-next-line:max-line-length
-  getBooks(offset: number, pageSize: number, query: string, req: Request, res: Response): Promise<BookDTO[] | undefined>;
+  getBooks(offset: number, pageSize: number, query: string, req: Request, res: Response): Promise<IPageableCollectionDTO<BookDTO> | undefined>;
   getBook(id: number, res: Response): Promise<BookDTO | undefined>;
   createBook(newBook: INewBookDTO, req: Request, res: Response): Promise<void>;
   updateBook(id: number, bookUpdate: IBookUpdateDTO, res: Response): Promise<BookDTO | undefined>;
@@ -56,14 +60,15 @@ export class BookController implements IBookController {
     @queryParam('q') query: string,
     @request() req: Request,
     @response() res: Response,
-  ): Promise<BookDTO[] | undefined> {
+  ): Promise<IPageableCollectionDTO<BookDTO> | undefined> {
     const validationResult = Joi.validate(req.query, Schemas.GetBooksQuery);
     try {
       if (validationResult.error) {
         throw new ValidationError(validationResult.error.message);
       }
-      const [books] = await this.bookService.getBooks(offset, pageSize, query);
-      return books.map(BookDTO.toDTO);
+      const [books, total] = await this.bookService.getBooks(offset, pageSize, query);
+      return new PageableCollectionBuilder(books.map(BookDTO.toDTO), req, Number(offset), Number(pageSize), total)
+        .build();
     } catch (error) {
       errorHandler(error, res);
     }

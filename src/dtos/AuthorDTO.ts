@@ -1,6 +1,9 @@
+import { Configuration } from '../config';
 import { Author } from '../entities/Author';
+import { ResourceBuilder } from '../util/ResourceBuilder';
+import { IResourceDTO } from './ResourceDTO';
 
-export interface IAuthorDTO {
+export interface IAuthorDTO extends IResourceDTO {
   firstName: string | null;
   fullName: string | null;
   id: number | null;
@@ -27,7 +30,11 @@ export class AuthorDTO implements IAuthorDTO {
       lastName: entity.last_name,
       middleName: entity.middle_name,
     };
-    return new AuthorDTO(data);
+    return new ResourceBuilder<IAuthorDTO>(AuthorDTO, data)
+      .addLink('self', `${Configuration.ROOT_PATH}/authors/${data.id}`)
+      .addLink('delete', `${Configuration.ROOT_PATH}/authors/${data.id}`, 'DELETE')
+      .addLink('update', `${Configuration.ROOT_PATH}/authors/${data.id}`, 'PATCH')
+      .build();
   }
 
   public firstName: string | null;

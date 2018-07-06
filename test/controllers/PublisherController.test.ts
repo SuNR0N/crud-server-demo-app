@@ -62,14 +62,50 @@ describe('PublisherController', () => {
   });
 
   describe('getPublisher', () => {
-    it('should return the publisher if one exists with the provided id', async () => {
-      const response = await agent(serverInstance)
-        .get('/api/v1/publishers/1');
+    describe('given a publisher exists with the provided id', () => {
+      let response: Response;
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({
-        id: 1,
-        name: 'Addison Wesley',
+      beforeAll(async () => {
+        response = await agent(serverInstance)
+          .get('/api/v1/publishers/1');
+      });
+
+      it('should return the properties of the publisher', () => {
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(expect.objectContaining({
+          id: 1,
+          name: 'Addison Wesley',
+        }));
+      });
+
+      it('should return a "self" link', () => {
+        expect(response.body._links).toHaveProperty(
+          'self',
+          {
+            href: '/api/v1/publishers/1',
+            method: 'GET',
+          },
+        );
+      });
+
+      it('should return an "update" link', () => {
+        expect(response.body._links).toHaveProperty(
+          'update',
+          {
+            href: '/api/v1/publishers/1',
+            method: 'PUT',
+          },
+        );
+      });
+
+      it('should return a "delete" link', () => {
+        expect(response.body._links).toHaveProperty(
+          'delete',
+          {
+            href: '/api/v1/publishers/1',
+            method: 'DELETE',
+          },
+        );
       });
     });
 
@@ -139,10 +175,10 @@ describe('PublisherController', () => {
           .get(response.header.location);
 
         expect(getResponse.status).toBe(200);
-        expect(getResponse.body).toEqual({
+        expect(getResponse.body).toEqual(expect.objectContaining({
           id: 13,
           name: 'FooBar',
-        });
+        }));
       });
     });
   });
@@ -186,10 +222,10 @@ describe('PublisherController', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({
+      expect(response.body).toEqual(expect.objectContaining({
         id: 2,
         name: 'FooBar',
-      });
+      }));
     });
   });
 

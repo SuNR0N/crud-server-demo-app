@@ -1,19 +1,56 @@
-import { PublisherDTO } from '../../src/dtos/PublisherDTO';
+import {
+  IPublisherDTO,
+  PublisherDTO,
+} from '../../src/dtos/PublisherDTO';
 import { Publisher } from '../../src/entities/Publisher';
 
 describe('PublisherDTO', () => {
   describe('toDTO', () => {
-    it('should map the entity to DTO', () => {
-      const publisher = {
-        id: 1,
-        name: 'Foo',
-      } as Publisher;
-      const dto = PublisherDTO.toDTO(publisher);
+    const publisher = {
+      id: 1,
+      name: 'Foo',
+    } as Publisher;
+    let dto: IPublisherDTO;
 
-      expect(dto).toEqual({
+    beforeEach(() => {
+      dto = PublisherDTO.toDTO(publisher);
+    });
+
+    it('should map the entity to DTO', () => {
+      expect(dto).toEqual(expect.objectContaining({
         id: 1,
         name: 'Foo',
-      });
+      }));
+    });
+
+    it('should add the "self" link', () => {
+      expect(dto._links).toHaveProperty(
+        'self',
+        {
+          href: '/api/v1/publishers/1',
+          method: 'GET',
+        },
+      );
+    });
+
+    it('should add the "delete" link', () => {
+      expect(dto._links).toHaveProperty(
+        'delete',
+        {
+          href: '/api/v1/publishers/1',
+          method: 'DELETE',
+        },
+      );
+    });
+
+    it('should add the "update" link', () => {
+      expect(dto._links).toHaveProperty(
+        'update',
+        {
+          href: '/api/v1/publishers/1',
+          method: 'PUT',
+        },
+      );
     });
   });
 

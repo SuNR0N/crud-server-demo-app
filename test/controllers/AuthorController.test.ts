@@ -114,17 +114,53 @@ describe('AuthorController', () => {
   });
 
   describe('getAuthor', () => {
-    it('should return the author if one exists with the provided id', async () => {
-      const response = await agent(serverInstance)
-        .get('/api/v1/authors/1');
+    describe('given an author exists with the provided id', () => {
+      let response: Response;
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({
-        firstName: 'Aaron',
-        fullName: 'Aaron Frost',
-        id: 1,
-        lastName: 'Frost',
-        middleName: null,
+      beforeAll(async () => {
+        response = await agent(serverInstance)
+          .get('/api/v1/authors/1');
+      });
+
+      it('should return the properties of the author', () => {
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(expect.objectContaining({
+          firstName: 'Aaron',
+          fullName: 'Aaron Frost',
+          id: 1,
+          lastName: 'Frost',
+          middleName: null,
+        }));
+      });
+
+      it('should return a "self" link', () => {
+        expect(response.body._links).toHaveProperty(
+          'self',
+          {
+            href: '/api/v1/authors/1',
+            method: 'GET',
+          },
+        );
+      });
+
+      it('should return an "update" link', () => {
+        expect(response.body._links).toHaveProperty(
+          'update',
+          {
+            href: '/api/v1/authors/1',
+            method: 'PATCH',
+          },
+        );
+      });
+
+      it('should return a "delete" link', () => {
+        expect(response.body._links).toHaveProperty(
+          'delete',
+          {
+            href: '/api/v1/authors/1',
+            method: 'DELETE',
+          },
+        );
       });
     });
 
@@ -212,13 +248,13 @@ describe('AuthorController', () => {
           .get(response.header.location);
 
         expect(getResponse.status).toBe(200);
-        expect(getResponse.body).toEqual({
+        expect(getResponse.body).toEqual(expect.objectContaining({
           firstName: 'John',
           fullName: 'John X Doe',
           id: 29,
           lastName: 'Doe',
           middleName: 'X',
-        });
+        }));
       });
     });
   });
@@ -253,13 +289,13 @@ describe('AuthorController', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({
+      expect(response.body).toEqual(expect.objectContaining({
         firstName: 'John',
         fullName: 'John Doe',
         id: 2,
         lastName: 'Doe',
         middleName: null,
-      });
+      }));
     });
   });
 
