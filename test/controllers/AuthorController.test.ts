@@ -117,7 +117,7 @@ describe('AuthorController', () => {
     describe('given an author exists with the provided id', () => {
       let response: Response;
 
-      beforeAll(async () => {
+      beforeEach(async () => {
         response = await agent(serverInstance)
           .get('/api/v1/authors/1');
       });
@@ -143,24 +143,43 @@ describe('AuthorController', () => {
         );
       });
 
-      it('should return an "update" link', () => {
-        expect(response.body._links).toHaveProperty(
-          'update',
-          {
-            href: '/api/v1/authors/1',
-            method: 'PATCH',
-          },
-        );
+      describe('and the current user is authenticated', () => {
+        beforeEach(async () => {
+          response = await TestUtils.createAuthenticatedUser(
+            serverInstance,
+            agent(serverInstance).get('/api/v1/authors/1'),
+          );
+        });
+
+        it('should return an "update" link', () => {
+          expect(response.body._links).toHaveProperty(
+            'update',
+            {
+              href: '/api/v1/authors/1',
+              method: 'PATCH',
+            },
+          );
+        });
+
+        it('should return a "delete" link', () => {
+          expect(response.body._links).toHaveProperty(
+            'delete',
+            {
+              href: '/api/v1/authors/1',
+              method: 'DELETE',
+            },
+          );
+        });
       });
 
-      it('should return a "delete" link', () => {
-        expect(response.body._links).toHaveProperty(
-          'delete',
-          {
-            href: '/api/v1/authors/1',
-            method: 'DELETE',
-          },
-        );
+      describe('and the current user is not authenticated', () => {
+        it('should not return an "update" link', () => {
+          expect(response.body._links).not.toHaveProperty('update');
+        });
+
+        it('should not return a "delete" link', () => {
+          expect(response.body._links).not.toHaveProperty('delete');
+        });
       });
     });
 
@@ -182,145 +201,212 @@ describe('AuthorController', () => {
   });
 
   describe('createAuthor', () => {
-    it('should return a 400 if the firstName is missing', async () => {
-      const response = await agent(serverInstance)
-        .post('/api/v1/authors')
-        .send({
-          lastName: 'Doe',
-        });
+    describe('given the current user is not authenticated', () => {
+      it('should return a 403', async () => {
+        const response = await agent(serverInstance)
+          .post('/api/v1/authors');
 
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'firstName' is required");
+        expect(response.status).toBe(403);
+        expect(response.text)
+          .toEqual('Forbidden');
+        });
     });
 
-    it('should return a 400 if the lastName is missing', async () => {
-      const response = await agent(serverInstance)
-        .post('/api/v1/authors')
-        .send({
-          firstName: 'John',
+    describe('given the current user is authenticated', () => {
+      it('should return a 400 if the firstName is missing', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .post('/api/v1/authors')
+            .send({
+              lastName: 'Doe',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'firstName' is required");
+      });
+
+      it('should return a 400 if the lastName is missing', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .post('/api/v1/authors')
+            .send({
+              firstName: 'John',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'lastName' is required");
+      });
+
+      it('should return a 400 if the request body contains unknown properties', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .post('/api/v1/authors')
+            .send({
+              firstName: 'John',
+              foo: 'bar',
+              lastName: 'Doe',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'foo' is not allowed");
+      });
+
+      describe('and it creates the author', () => {
+        let response: Response;
+
+        beforeAll(async () => {
+          response = await TestUtils.createAuthenticatedUser(
+            serverInstance,
+              agent(serverInstance)
+              .post('/api/v1/authors')
+              .send({
+                firstName: 'John',
+                lastName: 'Doe',
+                middleName: 'X',
+              }),
+          );
         });
 
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'lastName' is required");
-    });
-
-    it('should return a 400 if the request body contains unknown properties', async () => {
-      const response = await agent(serverInstance)
-        .post('/api/v1/authors')
-        .send({
-          firstName: 'John',
-          foo: 'bar',
-          lastName: 'Doe',
+        afterAll(async () => {
+          await agent(serverInstance)
+            .delete(response.header.location);
         });
 
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'foo' is not allowed");
-    });
+        it('should return a 201 with a location header pointing to the new resource', () => {
+          expect(response.status).toBe(201);
+          expect(response.header.location).toBe('/api/v1/authors/29');
+        });
 
-    describe('given it creates the author', () => {
-      let response: Response;
+        it('should return the created author when calling the returned location', async () => {
+          const getResponse = await agent(serverInstance)
+            .get(response.header.location);
 
-      beforeAll(async () => {
-        response = await agent(serverInstance)
-          .post('/api/v1/authors')
-          .send({
+          expect(getResponse.status).toBe(200);
+          expect(getResponse.body).toEqual(expect.objectContaining({
             firstName: 'John',
+            fullName: 'John X Doe',
+            id: 29,
             lastName: 'Doe',
             middleName: 'X',
-          });
-      });
-
-      afterAll(async () => {
-        await agent(serverInstance)
-          .delete(response.header.location);
-      });
-
-      it('should return a 201 with a location header pointing to the new resource', () => {
-        expect(response.status).toBe(201);
-        expect(response.header.location).toBe('/api/v1/authors/29');
-      });
-
-      it('should return the created author when calling the returned location', async () => {
-        const getResponse = await agent(serverInstance)
-          .get(response.header.location);
-
-        expect(getResponse.status).toBe(200);
-        expect(getResponse.body).toEqual(expect.objectContaining({
-          firstName: 'John',
-          fullName: 'John X Doe',
-          id: 29,
-          lastName: 'Doe',
-          middleName: 'X',
-        }));
+          }));
+        });
       });
     });
   });
 
   describe('updateAuthor', () => {
-    it('should return a 400 if the provided id is invalid', async () => {
-      const response = await agent(serverInstance)
-        .patch('/api/v1/authors/foobar');
+    describe('given the current user is not authenticated', () => {
+      it('should return a 403', async () => {
+        const response = await agent(serverInstance)
+          .patch('/api/v1/authors/2');
 
-      expect(response.status).toBe(400);
-      expect(response.text).toBe("The path parameter 'id' must be a number");
+        expect(response.status).toBe(403);
+        expect(response.text).toBe('Forbidden');
+      });
     });
 
-    it('should return a 400 if the request body contains unknown properties', async () => {
-      const response = await agent(serverInstance)
-        .patch('/api/v1/authors/2')
-        .send({
-          foo: 'bar',
-        });
+    describe('given the current user is authenticated', () => {
+      it('should return a 400 if the provided id is invalid', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/authors/foobar'),
+        );
 
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'foo' is not allowed");
-    });
+        expect(response.status).toBe(400);
+        expect(response.text).toBe("The path parameter 'id' must be a number");
+      });
 
-    it('should return the updated author if it succeeds', async () => {
-      const response = await agent(serverInstance)
-        .patch('/api/v1/authors/2')
-        .send({
+      it('should return a 400 if the request body contains unknown properties', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/authors/2')
+            .send({
+              foo: 'bar',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'foo' is not allowed");
+      });
+
+      it('should return the updated author if it succeeds', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/authors/2')
+            .send({
+              firstName: 'John',
+              lastName: 'Doe',
+            }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(expect.objectContaining({
           firstName: 'John',
+          fullName: 'John Doe',
+          id: 2,
           lastName: 'Doe',
-        });
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(expect.objectContaining({
-        firstName: 'John',
-        fullName: 'John Doe',
-        id: 2,
-        lastName: 'Doe',
-        middleName: null,
-      }));
+          middleName: null,
+        }));
+      });
     });
   });
 
   describe('deleteAuthor', () => {
-    it('should return a 400 if the provided id is invalid', async () => {
-      const response = await agent(serverInstance)
-        .delete('/api/v1/authors/foobar');
+    describe('given the current user is not authenticated', () => {
+      it('should return a 403', async () => {
+        const response = await agent(serverInstance)
+          .delete('/api/v1/authors/3');
 
-      expect(response.status).toBe(400);
-      expect(response.text).toBe("The path parameter 'id' must be a number");
+        expect(response.status).toBe(403);
+        expect(response.text).toBe('Forbidden');
+      });
     });
 
-    it('should return a 404 if no author exists with the provided id', async () => {
-      const response = await agent(serverInstance)
-        .delete('/api/v1/authors/999');
+    describe('given the current user is authenticated', () => {
+      it('should return a 400 if the provided id is invalid', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .delete('/api/v1/authors/foobar'),
+        );
 
-      expect(response.status).toBe(404);
-      expect(response.text).toBe('Author with ID = 999 does not exist');
-    });
+        expect(response.status).toBe(400);
+        expect(response.text).toBe("The path parameter 'id' must be a number");
+      });
 
-    it('should return a 204 if the delete operation succeeds', async () => {
-      const response = await agent(serverInstance)
-        .delete('/api/v1/authors/3');
+      it('should return a 404 if no author exists with the provided id', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .delete('/api/v1/authors/999'),
+        );
 
-      expect(response.status).toBe(204);
+        expect(response.status).toBe(404);
+        expect(response.text).toBe('Author with ID = 999 does not exist');
+      });
+
+      it('should return a 204 if the delete operation succeeds', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .delete('/api/v1/authors/3'),
+        );
+
+        expect(response.status).toBe(204);
+      });
     });
   });
 });

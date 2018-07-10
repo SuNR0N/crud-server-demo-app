@@ -40,3 +40,11 @@ CREATE TABLE book_publisher (
   publisher_id SMALLINT REFERENCES publisher (id) ON UPDATE CASCADE ON DELETE CASCADE,
   CONSTRAINT book_publisher_pkey PRIMARY KEY (book_id, publisher_id)
 );
+
+CREATE TABLE users (
+  id INT PRIMARY KEY NOT NULL,
+  avatar_url VARCHAR(255),
+  email VARCHAR(255) NOT NULL,
+  name VARCHAR(255),
+  username VARCHAR(39) NOT NULL
+);

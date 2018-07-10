@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 import { Configuration } from '../config';
 import {
   Book,
@@ -28,7 +30,7 @@ const publisherMapper = (publisher: Publisher): string => {
 };
 
 export class BookDTO implements IBookDTO {
-  public static toDTO(entity: Book): BookDTO {
+  public static toDTO(entity: Book, req: Request): BookDTO {
     const data: IBookDTO = {
       authors: (entity.authors || []).map(fullNameMapper),
       categories: (entity.categories || []).map(categoryMapper),
@@ -39,11 +41,16 @@ export class BookDTO implements IBookDTO {
       publishers: (entity.publishers || []).map(publisherMapper),
       title: entity.title,
     };
-    return new ResourceBuilder<IBookDTO>(BookDTO, data)
-      .addLink('self', `${Configuration.ROOT_PATH}/books/${data.id}`)
-      .addLink('delete', `${Configuration.ROOT_PATH}/books/${data.id}`, 'DELETE')
-      .addLink('update', `${Configuration.ROOT_PATH}/books/${data.id}`, 'PATCH')
-      .build();
+    const builder = new ResourceBuilder<IBookDTO>(BookDTO, data)
+      .addLink('self', `${Configuration.ROOT_PATH}/books/${data.id}`);
+
+    if (req.isAuthenticated()) {
+      builder
+        .addLink('delete', `${Configuration.ROOT_PATH}/books/${data.id}`, 'DELETE')
+        .addLink('update', `${Configuration.ROOT_PATH}/books/${data.id}`, 'PATCH');
+    }
+
+    return builder.build();
   }
 
   public authors: string[];

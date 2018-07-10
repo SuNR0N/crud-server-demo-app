@@ -18,6 +18,7 @@ import {
 } from 'inversify-express-utils';
 import Joi from 'joi';
 
+import { isAuthenticated } from '../config/passport';
 import {
   Schemas,
   Types,
@@ -40,9 +41,9 @@ import {
 export interface IBookController {
   // tslint:disable-next-line:max-line-length
   getBooks(offset: number, pageSize: number, query: string, req: Request, res: Response): Promise<IPageableCollectionDTO<BookDTO> | undefined>;
-  getBook(id: number, res: Response): Promise<BookDTO | undefined>;
+  getBook(id: number, req: Request, res: Response): Promise<BookDTO | undefined>;
   createBook(newBook: INewBookDTO, req: Request, res: Response): Promise<void>;
-  updateBook(id: number, bookUpdate: IBookUpdateDTO, res: Response): Promise<BookDTO | undefined>;
+  updateBook(id: number, bookUpdate: IBookUpdateDTO, req: Request, res: Response): Promise<BookDTO | undefined>;
   deleteBook(id: number, res: Response): Promise<void>;
 }
 
@@ -67,8 +68,13 @@ export class BookController implements IBookController {
         throw new ValidationError(validationResult.error.message);
       }
       const [books, total] = await this.bookService.getBooks(offset, pageSize, query);
-      return new PageableCollectionBuilder(books.map(BookDTO.toDTO), req, Number(offset), Number(pageSize), total)
-        .build();
+      return new PageableCollectionBuilder(
+        books.map((book) => BookDTO.toDTO(book, req)),
+        req,
+        Number(offset),
+        Number(pageSize),
+        total,
+      ).build();
     } catch (error) {
       errorHandler(error, res);
     }
@@ -77,6 +83,7 @@ export class BookController implements IBookController {
   @httpGet('/:id')
   public async getBook(
     @requestParam('id') id: number,
+    @request() req: Request,
     @response() res: Response,
   ): Promise<BookDTO | undefined> {
     const validationResult = Joi.validate(id, Schemas.Id);
@@ -85,13 +92,13 @@ export class BookController implements IBookController {
         throw new ValidationError(validationResult.error.message);
       }
       const book = await this.bookService.getBook(id);
-      return BookDTO.toDTO(book);
+      return BookDTO.toDTO(book, req);
     } catch (error) {
       errorHandler(error, res);
     }
   }
 
-  @httpPost('/')
+  @httpPost('/', isAuthenticated)
   public async createBook(
     @requestBody() newBook: INewBookDTO,
     @request() req: Request,
@@ -110,10 +117,11 @@ export class BookController implements IBookController {
     }
   }
 
-  @httpPatch('/:id')
+  @httpPatch('/:id', isAuthenticated)
   public async updateBook(
     @requestParam('id') id: number,
     @requestBody() bookUpdate: IBookUpdateDTO,
+    @request() req: Request,
     @response() res: Response,
   ): Promise<BookDTO | undefined> {
     const validationResultId = Joi.validate(id, Schemas.Id);
@@ -125,13 +133,13 @@ export class BookController implements IBookController {
         throw new ValidationError(validationResultBookUpdate.error.message);
       }
       const updatedBook = await this.bookService.updateBook(id, new BookUpdateDTO(bookUpdate));
-      return BookDTO.toDTO(updatedBook);
+      return BookDTO.toDTO(updatedBook, req);
     } catch (error) {
       errorHandler(error, res);
     }
   }
 
-  @httpDelete('/:id')
+  @httpDelete('/:id', isAuthenticated)
   public async deleteBook(
     @requestParam('id') id: number,
     @response() res: Response,

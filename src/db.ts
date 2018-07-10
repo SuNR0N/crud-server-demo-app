@@ -10,6 +10,7 @@ import {
   Book,
   Category,
   Publisher,
+  User,
 } from './entities';
 
 export async function getDbConnection(): Promise<Connection> {
@@ -19,6 +20,7 @@ export async function getDbConnection(): Promise<Connection> {
     Book,
     Category,
     Publisher,
+    User,
   ];
 
   const baseConnectionOptions: ConnectionOptions = {

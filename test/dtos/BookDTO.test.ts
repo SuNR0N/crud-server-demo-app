@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 import {
   BookDTO,
   IBookDTO,
@@ -33,9 +35,13 @@ describe('BookDTO', () => {
       title: 'FooBar',
     } as Book;
     let dto: IBookDTO;
+    let isAuthenticatedMock: jest.Mock;
 
     beforeEach(() => {
-      dto = BookDTO.toDTO(book);
+      isAuthenticatedMock = jest.fn(() => false);
+      dto = BookDTO.toDTO(book, {
+        isAuthenticated: isAuthenticatedMock,
+      } as any as Request);
     });
 
     it('should map the entity to DTO', () => {
@@ -71,7 +77,9 @@ describe('BookDTO', () => {
         publishers: null,
         title: 'FooBar',
       } as any as Book;
-      const dtoWithoutRelationships = BookDTO.toDTO(bookWithoutRelationships);
+      const dtoWithoutRelationships = BookDTO.toDTO(bookWithoutRelationships, {
+        isAuthenticated: isAuthenticatedMock,
+      } as any as Request);
 
       expect(dtoWithoutRelationships).toEqual(expect.objectContaining({
         authors: [],
@@ -95,24 +103,43 @@ describe('BookDTO', () => {
       );
     });
 
-    it('should add the "delete" link', () => {
-      expect(dto._links).toHaveProperty(
-        'delete',
-        {
-          href: '/api/v1/books/1',
-          method: 'DELETE',
-        },
-      );
+    describe('given the request is authenticated', () => {
+      beforeEach(() => {
+        isAuthenticatedMock = jest.fn(() => true);
+        dto = BookDTO.toDTO(book, {
+          isAuthenticated: isAuthenticatedMock,
+        } as any as Request);
+      });
+
+      it('should add the "delete" link', () => {
+        expect(dto._links).toHaveProperty(
+          'delete',
+          {
+            href: '/api/v1/books/1',
+            method: 'DELETE',
+          },
+        );
+      });
+
+      it('should add the "update" link', () => {
+        expect(dto._links).toHaveProperty(
+          'update',
+          {
+            href: '/api/v1/books/1',
+            method: 'PATCH',
+          },
+        );
+      });
     });
 
-    it('should add the "update" link', () => {
-      expect(dto._links).toHaveProperty(
-        'update',
-        {
-          href: '/api/v1/books/1',
-          method: 'PATCH',
-        },
-      );
+    describe('given the request is not authenticated', () => {
+      it('should not add the "delete" link', () => {
+        expect(dto._links).not.toHaveProperty('delete');
+      });
+
+      it('should not add the "update" link', () => {
+        expect(dto._links).not.toHaveProperty('update');
+      });
     });
   });
 

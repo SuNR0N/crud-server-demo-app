@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 import { Configuration } from '../config';
 import { Author } from '../entities/Author';
 import { ResourceBuilder } from '../util/ResourceBuilder';
@@ -22,7 +24,7 @@ export const fullNameMapper = (author: Author): string => {
 };
 
 export class AuthorDTO implements IAuthorDTO {
-  public static toDTO(entity: Author): AuthorDTO {
+  public static toDTO(entity: Author, req: Request): AuthorDTO {
     const data: IAuthorDTO = {
       firstName: entity.first_name,
       fullName: fullNameMapper(entity),
@@ -30,11 +32,16 @@ export class AuthorDTO implements IAuthorDTO {
       lastName: entity.last_name,
       middleName: entity.middle_name,
     };
-    return new ResourceBuilder<IAuthorDTO>(AuthorDTO, data)
-      .addLink('self', `${Configuration.ROOT_PATH}/authors/${data.id}`)
-      .addLink('delete', `${Configuration.ROOT_PATH}/authors/${data.id}`, 'DELETE')
-      .addLink('update', `${Configuration.ROOT_PATH}/authors/${data.id}`, 'PATCH')
-      .build();
+    const builder = new ResourceBuilder<IAuthorDTO>(AuthorDTO, data)
+      .addLink('self', `${Configuration.ROOT_PATH}/authors/${data.id}`);
+
+    if (req.isAuthenticated()) {
+      builder
+        .addLink('delete', `${Configuration.ROOT_PATH}/authors/${data.id}`, 'DELETE')
+        .addLink('update', `${Configuration.ROOT_PATH}/authors/${data.id}`, 'PATCH');
+    }
+
+    return builder.build();
   }
 
   public firstName: string | null;

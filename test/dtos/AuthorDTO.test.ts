@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 import {
   AuthorDTO,
   fullNameMapper,
@@ -37,9 +39,13 @@ describe('AuthorDTO', () => {
       middle_name: 'X',
     } as Author;
     let dto: IAuthorDTO;
+    let isAuthenticatedMock: jest.Mock;
 
     beforeEach(() => {
-      dto = AuthorDTO.toDTO(author);
+      isAuthenticatedMock = jest.fn(() => false);
+      dto = AuthorDTO.toDTO(author, {
+        isAuthenticated: isAuthenticatedMock,
+      } as any as Request);
     });
 
     it('should map the entity to DTO', () => {
@@ -62,24 +68,43 @@ describe('AuthorDTO', () => {
       );
     });
 
-    it('should add the "delete" link', () => {
-      expect(dto._links).toHaveProperty(
-        'delete',
-        {
-          href: '/api/v1/authors/1',
-          method: 'DELETE',
-        },
-      );
+    describe('given the request is authenticated', () => {
+      beforeEach(() => {
+        isAuthenticatedMock = jest.fn(() => true);
+        dto = AuthorDTO.toDTO(author, {
+          isAuthenticated: isAuthenticatedMock,
+        } as any as Request);
+      });
+
+      it('should add the "delete" link', () => {
+        expect(dto._links).toHaveProperty(
+          'delete',
+          {
+            href: '/api/v1/authors/1',
+            method: 'DELETE',
+          },
+        );
+      });
+
+      it('should add the "update" link', () => {
+        expect(dto._links).toHaveProperty(
+          'update',
+          {
+            href: '/api/v1/authors/1',
+            method: 'PATCH',
+          },
+        );
+      });
     });
 
-    it('should add the "update" link', () => {
-      expect(dto._links).toHaveProperty(
-        'update',
-        {
-          href: '/api/v1/authors/1',
-          method: 'PATCH',
-        },
-      );
+    describe('given the request is not authenticated', () => {
+      it('should not add the "delete" link', () => {
+        expect(dto._links).not.toHaveProperty('delete');
+      });
+
+      it('should not add the "update" link', () => {
+        expect(dto._links).not.toHaveProperty('update');
+      });
     });
   });
 

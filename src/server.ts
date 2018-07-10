@@ -8,6 +8,11 @@ import {
   setup,
 } from 'swagger-ui-express';
 import { parse } from 'yamljs';
+import { Container } from 'inversify';
+import { Application } from 'express';
+import { readFileSync } from 'fs';
+import passport from 'passport';
+import expressSession from 'express-session';
 
 import {
   Configuration,
@@ -17,9 +22,8 @@ import {
   logger,
   requestLogger,
 } from './util';
-import { Container } from 'inversify';
-import { Application } from 'express';
-import { readFileSync } from 'fs';
+import { configurePassort } from './config/passport';
+import { Types } from './constants';
 
 export async function getServerInstance(): Promise<Application> {
   const container = new Container();
@@ -31,6 +35,7 @@ export async function getServerInstance(): Promise<Application> {
       rootPath: Configuration.ROOT_PATH,
     },
   );
+  await configurePassort(passport, container.get(Types.UserService));
   server.setConfig((app) => {
     app.use(bodyParser.urlencoded({
       extended: true,
@@ -39,6 +44,13 @@ export async function getServerInstance(): Promise<Application> {
     app.use(expressWinston.logger({
       winstonInstance: requestLogger,
     }));
+    app.use(expressSession({
+      resave: true,
+      saveUninitialized: true,
+      secret: Configuration.SESSION_SECRET,
+    }));
+    app.use(passport.initialize());
+    app.use(passport.session());
 
     // Routes
 

@@ -283,7 +283,7 @@ describe('BookController', () => {
     describe('given a book exists with the provided id', () => {
       let response: Response;
 
-      beforeAll(async () => {
+      beforeEach(async () => {
         response = await agent(serverInstance)
           .get('/api/v1/books/1');
       });
@@ -318,24 +318,43 @@ describe('BookController', () => {
         );
       });
 
-      it('should return an "update" link', () => {
-        expect(response.body._links).toHaveProperty(
-          'update',
-          {
-            href: '/api/v1/books/1',
-            method: 'PATCH',
-          },
-        );
+      describe('and the current user is authenticated', () => {
+        beforeEach(async () => {
+          response = await TestUtils.createAuthenticatedUser(
+            serverInstance,
+            agent(serverInstance).get('/api/v1/books/1'),
+          );
+        });
+
+        it('should return an "update" link', () => {
+          expect(response.body._links).toHaveProperty(
+            'update',
+            {
+              href: '/api/v1/books/1',
+              method: 'PATCH',
+            },
+          );
+        });
+
+        it('should return a "delete" link', () => {
+          expect(response.body._links).toHaveProperty(
+            'delete',
+            {
+              href: '/api/v1/books/1',
+              method: 'DELETE',
+            },
+          );
+        });
       });
 
-      it('should return a "delete" link', () => {
-        expect(response.body._links).toHaveProperty(
-          'delete',
-          {
-            href: '/api/v1/books/1',
-            method: 'DELETE',
-          },
-        );
+      describe('and the current user is not authenticated', () => {
+        it('should not return an "update" link', () => {
+          expect(response.body._links).not.toHaveProperty('update');
+        });
+
+        it('should not return a "delete" link', () => {
+          expect(response.body._links).not.toHaveProperty('delete');
+        });
       });
     });
 
@@ -357,219 +376,451 @@ describe('BookController', () => {
   });
 
   describe('createBook', () => {
-    it('should return a 400 if the isbn13 is missing', async () => {
-      const response = await agent(serverInstance)
-        .post('/api/v1/books')
-        .send({
-          title: 'FooBar',
-        });
+    describe('given the current user is not authenticated', () => {
+      it('should return a 403', async () => {
+        const response = await agent(serverInstance)
+          .post('/api/v1/books');
 
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'isbn13' is required");
+        expect(response.status).toBe(403);
+        expect(response.text).toEqual('Forbidden');
+      });
     });
 
-    it('should return a 400 if the title is missing', async () => {
-      const response = await agent(serverInstance)
-        .post('/api/v1/books')
-        .send({
-          isbn13: '1234567890123',
+    describe('given the current user is authenticated', () => {
+      it('should return a 400 if the isbn13 is missing', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .post('/api/v1/books')
+            .send({
+              title: 'FooBar',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'isbn13' is required");
+      });
+
+      it('should return a 400 if the title is missing', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .post('/api/v1/books')
+            .send({
+              isbn13: '1234567890123',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'title' is required");
+      });
+
+      it('should return a 400 if the request body contains unknown properties', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .post('/api/v1/books')
+            .send({
+              foo: 'bar',
+              isbn13: '1234567890123',
+              title: 'FooBar',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'foo' is not allowed");
+      });
+
+      it('should return a 400 if a provided author does not exist', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .post('/api/v1/books')
+            .send({
+              authors: [
+                1,
+                999,
+              ],
+              isbn13: '1234567890123',
+              title: 'FooBar',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual('A foreign key constraint violation occurred. Author with ID = 999 does not exist');
+      });
+
+      it('should return a 400 if a provided author has an invalid type', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .post('/api/v1/books')
+            .send({
+              authors: [
+                1,
+                'John Doe',
+              ],
+              isbn13: '1234567890123',
+              title: 'FooBar',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'authors' must contain numbers only");
+      });
+
+      it('should return a 400 if a provided category does not exist', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .post('/api/v1/books')
+            .send({
+              categories: [
+                1,
+                999,
+              ],
+              isbn13: '1234567890123',
+              title: 'FooBar',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual('A foreign key constraint violation occurred. Category with ID = 999 does not exist');
+      });
+
+      it('should return a 400 if a provided category has an invalid type', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .post('/api/v1/books')
+            .send({
+              categories: [
+                1,
+                'FooBar',
+              ],
+              isbn13: '1234567890123',
+              title: 'FooBar',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'categories' must contain numbers only");
+      });
+
+      it('should return a 400 if a provided publisher does not exist', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .post('/api/v1/books')
+            .send({
+              isbn13: '1234567890123',
+              publishers: [
+                1,
+                999,
+              ],
+              title: 'FooBar',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual('A foreign key constraint violation occurred. Publisher with ID = 999 does not exist');
+      });
+
+      it('should return a 400 if a provided publisher has an invalid type', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .post('/api/v1/books')
+            .send({
+              isbn13: '1234567890123',
+              publishers: [
+                1,
+                'FooBar',
+              ],
+              title: 'FooBar',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'publishers' must contain numbers only");
+      });
+
+      it('should return a 409 if a book already exists with the provided isbn13', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .post('/api/v1/books')
+            .send({
+              isbn13: '9780596517748',
+              title: 'FooBar',
+            }),
+        );
+
+        expect(response.status).toBe(409);
+        expect(response.text)
+        .toEqual('A unique constraint violation occurred. Key (isbn_13) with value (9780596517748) already exists');
+      });
+
+      describe('and it creates the book', () => {
+        let response: Response;
+
+        beforeAll(async () => {
+          // Sequence is incremented on failed insert
+          await TestUtils.resetDatabase();
+          response = await TestUtils.createAuthenticatedUser(
+            serverInstance,
+            agent(serverInstance)
+              .post('/api/v1/books')
+              .send({
+                authors: [
+                  1,
+                  3,
+                  5,
+                ],
+                categories: [
+                  7, 9,
+                ],
+                isbn10: '1234567890',
+                isbn13: '1234567890123',
+                publicationDate: '2001-02-03',
+                publishers: [
+                  4,
+                  8,
+                ],
+                title: 'FooBar',
+              }),
+          );
         });
 
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'title' is required");
-    });
-
-    it('should return a 400 if the request body contains unknown properties', async () => {
-      const response = await agent(serverInstance)
-        .post('/api/v1/books')
-        .send({
-          foo: 'bar',
-          isbn13: '1234567890123',
-          title: 'FooBar',
+        afterAll(async () => {
+          await agent(serverInstance)
+            .delete(response.header.location);
         });
 
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'foo' is not allowed");
-    });
-
-    it('should return a 400 if a provided author does not exist', async () => {
-      const response = await agent(serverInstance)
-        .post('/api/v1/books')
-        .send({
-          authors: [
-            1,
-            999,
-          ],
-          isbn13: '1234567890123',
-          title: 'FooBar',
+        it('should return a 201 with a location header pointing to the new resource', () => {
+          expect(response.status).toBe(201);
+          expect(response.header.location).toBe('/api/v1/books/23');
         });
 
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual('A foreign key constraint violation occurred. Author with ID = 999 does not exist');
-    });
+        it('should return the created book when calling the returned location', async () => {
+          const getResponse = await agent(serverInstance)
+            .get(response.header.location);
 
-    it('should return a 400 if a provided author has an invalid type', async () => {
-      const response = await agent(serverInstance)
-        .post('/api/v1/books')
-        .send({
-          authors: [
-            1,
-            'John Doe',
-          ],
-          isbn13: '1234567890123',
-          title: 'FooBar',
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'authors' must contain numbers only");
-    });
-
-    it('should return a 400 if a provided category does not exist', async () => {
-      const response = await agent(serverInstance)
-        .post('/api/v1/books')
-        .send({
-          categories: [
-            1,
-            999,
-          ],
-          isbn13: '1234567890123',
-          title: 'FooBar',
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual('A foreign key constraint violation occurred. Category with ID = 999 does not exist');
-    });
-
-    it('should return a 400 if a provided category has an invalid type', async () => {
-      const response = await agent(serverInstance)
-        .post('/api/v1/books')
-        .send({
-          categories: [
-            1,
-            'FooBar',
-          ],
-          isbn13: '1234567890123',
-          title: 'FooBar',
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'categories' must contain numbers only");
-    });
-
-    it('should return a 400 if a provided publisher does not exist', async () => {
-      const response = await agent(serverInstance)
-        .post('/api/v1/books')
-        .send({
-          isbn13: '1234567890123',
-          publishers: [
-            1,
-            999,
-          ],
-          title: 'FooBar',
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual('A foreign key constraint violation occurred. Publisher with ID = 999 does not exist');
-    });
-
-    it('should return a 400 if a provided publisher has an invalid type', async () => {
-      const response = await agent(serverInstance)
-        .post('/api/v1/books')
-        .send({
-          isbn13: '1234567890123',
-          publishers: [
-            1,
-            'FooBar',
-          ],
-          title: 'FooBar',
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'publishers' must contain numbers only");
-    });
-
-    it('should return a 409 if a book already exists with the provided isbn13', async () => {
-      const response = await agent(serverInstance)
-        .post('/api/v1/books')
-        .send({
-          isbn13: '9780596517748',
-          title: 'FooBar',
-        });
-
-      expect(response.status).toBe(409);
-      expect(response.text)
-      .toEqual('A unique constraint violation occurred. Key (isbn_13) with value (9780596517748) already exists');
-    });
-
-    describe('given it creates the book', () => {
-      let response: Response;
-
-      beforeAll(async () => {
-        // Sequence is incremented on failed insert
-        await TestUtils.resetDatabase();
-        response = await agent(serverInstance)
-          .post('/api/v1/books')
-          .send({
+          expect(getResponse.status).toBe(200);
+          expect(getResponse.body).toEqual(expect.objectContaining({
             authors: [
-              1,
-              3,
-              5,
+              'Aaron Frost',
+              'Al Sweigart',
+              'Ari Lerner',
             ],
             categories: [
-              7, 9,
+              'Comics & Graphic Novels',
+              'Cookbooks, Food & Wine',
             ],
+            id: 23,
             isbn10: '1234567890',
             isbn13: '1234567890123',
             publicationDate: '2001-02-03',
             publishers: [
-              4,
-              8,
+              'CareerMonk Publications',
+              "O'Reilly Media",
             ],
             title: 'FooBar',
-          });
+          }));
+        });
+      });
+    });
+  });
+
+  describe('updateBook', () => {
+    describe('given the current user is not authenticated', () => {
+      it('should return a 403', async () => {
+        const response = await agent(serverInstance)
+          .patch('/api/v1/books/2');
+
+        expect(response.status).toBe(403);
+        expect(response.text).toBe('Forbidden');
+      });
+    });
+
+    describe('given the current user is authenticated', () => {
+      it('should return a 400 if the provided id is invalid', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/books/foobar'),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text).toBe("The path parameter 'id' must be a number");
       });
 
-      afterAll(async () => {
-        await agent(serverInstance)
-          .delete(response.header.location);
+      it('should return a 400 if the request body contains unknown properties', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/books/2')
+            .send({
+              foo: 'bar',
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'foo' is not allowed");
       });
 
-      it('should return a 201 with a location header pointing to the new resource', () => {
-        expect(response.status).toBe(201);
-        expect(response.header.location).toBe('/api/v1/books/23');
+      it('should return a 400 if a provided author does not exist', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/books/2')
+            .send({
+              authors: [
+                1,
+                999,
+              ],
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual('A foreign key constraint violation occurred. Author with ID = 999 does not exist');
       });
 
-      it('should return the created book when calling the returned location', async () => {
-        const getResponse = await agent(serverInstance)
-          .get(response.header.location);
+      it('should return a 400 if a provided author has an invalid type', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/books/2')
+            .send({
+              authors: [
+                1,
+                'John Doe',
+              ],
+              isbn13: '1234567890123',
+              title: 'FooBar',
+            }),
+        );
 
-        expect(getResponse.status).toBe(200);
-        expect(getResponse.body).toEqual(expect.objectContaining({
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'authors' must contain numbers only");
+      });
+
+      it('should return a 400 if a provided category does not exist', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/books/2')
+            .send({
+              categories: [
+                1,
+                999,
+              ],
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual('A foreign key constraint violation occurred. Category with ID = 999 does not exist');
+      });
+
+      it('should return a 400 if a provided category has an invalid type', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/books/2')
+            .send({
+              categories: [
+                1,
+                'FooBar',
+              ],
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'categories' must contain numbers only");
+      });
+
+      it('should return a 400 if a provided publisher does not exist', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/books/2')
+            .send({
+              publishers: [
+                1,
+                999,
+              ],
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual('A foreign key constraint violation occurred. Publisher with ID = 999 does not exist');
+      });
+
+      it('should return a 400 if a provided publisher has an invalid type', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/books/2')
+            .send({
+              publishers: [
+                1,
+                'FooBar',
+              ],
+            }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.text)
+          .toEqual("The property 'publishers' must contain numbers only");
+      });
+
+      it('should return the updated publisher if it succeeds', async () => {
+        // Sequence is incremented on failed insert
+        await TestUtils.resetDatabase();
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/books/2')
+            .send({
+              authors: [
+                1,
+                3,
+              ],
+              publicationDate: '2001-02-03',
+              title: 'FooBar',
+            }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(expect.objectContaining({
           authors: [
             'Aaron Frost',
             'Al Sweigart',
-            'Ari Lerner',
           ],
           categories: [
-            'Comics & Graphic Novels',
-            'Cookbooks, Food & Wine',
+            'Computers & Technology',
           ],
-          id: 23,
-          isbn10: '1234567890',
-          isbn13: '1234567890123',
+          id: 2,
+          isbn10: '020161622X',
+          isbn13: '9780201616224',
           publicationDate: '2001-02-03',
           publishers: [
-            'CareerMonk Publications',
-            "O'Reilly Media",
+            'Addison Wesley',
           ],
           title: 'FooBar',
         }));
@@ -577,176 +828,49 @@ describe('BookController', () => {
     });
   });
 
-  describe('updateBook', () => {
-    it('should return a 400 if the provided id is invalid', async () => {
-      const response = await agent(serverInstance)
-        .patch('/api/v1/books/foobar');
-
-      expect(response.status).toBe(400);
-      expect(response.text).toBe("The path parameter 'id' must be a number");
-    });
-
-    it('should return a 400 if the request body contains unknown properties', async () => {
-      const response = await agent(serverInstance)
-        .patch('/api/v1/books/2')
-        .send({
-          foo: 'bar',
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'foo' is not allowed");
-    });
-
-    it('should return a 400 if a provided author does not exist', async () => {
-      const response = await agent(serverInstance)
-        .patch('/api/v1/books/2')
-        .send({
-          authors: [
-            1,
-            999,
-          ],
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual('A foreign key constraint violation occurred. Author with ID = 999 does not exist');
-    });
-
-    it('should return a 400 if a provided author has an invalid type', async () => {
-      const response = await agent(serverInstance)
-        .patch('/api/v1/books/2')
-        .send({
-          authors: [
-            1,
-            'John Doe',
-          ],
-          isbn13: '1234567890123',
-          title: 'FooBar',
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'authors' must contain numbers only");
-    });
-
-    it('should return a 400 if a provided category does not exist', async () => {
-      const response = await agent(serverInstance)
-        .patch('/api/v1/books/2')
-        .send({
-          categories: [
-            1,
-            999,
-          ],
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual('A foreign key constraint violation occurred. Category with ID = 999 does not exist');
-    });
-
-    it('should return a 400 if a provided category has an invalid type', async () => {
-      const response = await agent(serverInstance)
-        .patch('/api/v1/books/2')
-        .send({
-          categories: [
-            1,
-            'FooBar',
-          ],
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'categories' must contain numbers only");
-    });
-
-    it('should return a 400 if a provided publisher does not exist', async () => {
-      const response = await agent(serverInstance)
-        .patch('/api/v1/books/2')
-        .send({
-          publishers: [
-            1,
-            999,
-          ],
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual('A foreign key constraint violation occurred. Publisher with ID = 999 does not exist');
-    });
-
-    it('should return a 400 if a provided publisher has an invalid type', async () => {
-      const response = await agent(serverInstance)
-        .patch('/api/v1/books/2')
-        .send({
-          publishers: [
-            1,
-            'FooBar',
-          ],
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.text)
-        .toEqual("The property 'publishers' must contain numbers only");
-    });
-
-    it('should return the updated publisher if it succeeds', async () => {
-      // Sequence is incremented on failed insert
-      await TestUtils.resetDatabase();
-      const response = await agent(serverInstance)
-        .patch('/api/v1/books/2')
-        .send({
-          authors: [
-            1,
-            3,
-          ],
-          publicationDate: '2001-02-03',
-          title: 'FooBar',
-        });
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(expect.objectContaining({
-        authors: [
-          'Aaron Frost',
-          'Al Sweigart',
-        ],
-        categories: [
-          'Computers & Technology',
-        ],
-        id: 2,
-        isbn10: '020161622X',
-        isbn13: '9780201616224',
-        publicationDate: '2001-02-03',
-        publishers: [
-          'Addison Wesley',
-        ],
-        title: 'FooBar',
-      }));
-    });
-  });
-
   describe('deleteBook', () => {
-    it('should return a 400 if the provided id is invalid', async () => {
-      const response = await agent(serverInstance)
-        .delete('/api/v1/books/foobar');
+    describe('given the current user is not authenticated', () => {
+      it('should return a 403', async () => {
+        const response = await agent(serverInstance)
+          .delete('/api/v1/books/3');
 
-      expect(response.status).toBe(400);
-      expect(response.text).toBe("The path parameter 'id' must be a number");
+        expect(response.status).toBe(403);
+        expect(response.text).toBe('Forbidden');
+      });
     });
 
-    it('should return a 404 if no book exists with the provided id', async () => {
-      const response = await agent(serverInstance)
-        .delete('/api/v1/books/999');
+    describe('given the current user is authenticated', () => {
+      it('should return a 400 if the provided id is invalid', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .delete('/api/v1/books/foobar'),
+        );
 
-      expect(response.status).toBe(404);
-      expect(response.text).toBe('Book with ID = 999 does not exist');
-    });
+        expect(response.status).toBe(400);
+        expect(response.text).toBe("The path parameter 'id' must be a number");
+      });
 
-    it('should return a 204 if the delete operation succeeds', async () => {
-      const response = await agent(serverInstance)
-        .delete('/api/v1/books/3');
+      it('should return a 404 if no book exists with the provided id', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .delete('/api/v1/books/999'),
+        );
 
-      expect(response.status).toBe(204);
+        expect(response.status).toBe(404);
+        expect(response.text).toBe('Book with ID = 999 does not exist');
+      });
+
+      it('should return a 204 if the delete operation succeeds', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .delete('/api/v1/books/3'),
+        );
+
+        expect(response.status).toBe(204);
+      });
     });
   });
 });

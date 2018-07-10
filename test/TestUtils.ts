@@ -1,8 +1,14 @@
+import { Application } from 'express';
 import {
   readdirSync,
   readFileSync,
 } from 'fs';
 import { join } from 'path';
+import {
+  agent,
+  Response,
+  Test,
+} from 'supertest';
 import { getConnection } from 'typeorm';
 
 export class TestUtils {
@@ -16,6 +22,13 @@ export class TestUtils {
   public static async resetDatabase() {
     await this.clearDatabase();
     await this.seedDatabase();
+  }
+
+  public static async createAuthenticatedUser(server: Application, test: Test): Promise<Response> {
+    const response = await agent(server)
+      .get('/api/v1/auth/github/callback');
+    const cookie = response.header['set-cookie'];
+    return await test.set('cookie', cookie);
   }
 
   private static async clearDatabase() {

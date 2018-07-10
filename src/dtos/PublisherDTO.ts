@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 import { Configuration } from '../config';
 import { Publisher } from '../entities/Publisher';
 import { ResourceBuilder } from '../util/ResourceBuilder';
@@ -9,16 +11,22 @@ export interface IPublisherDTO extends IResourceDTO {
 }
 
 export class PublisherDTO implements IPublisherDTO {
-  public static toDTO(entity: Publisher): PublisherDTO {
+  public static toDTO(entity: Publisher, req: Request): PublisherDTO {
     const data: IPublisherDTO = {
       id: entity.id,
       name: entity.name,
     };
-    return new ResourceBuilder<IPublisherDTO>(PublisherDTO, data)
-      .addLink('self', `${Configuration.ROOT_PATH}/publishers/${data.id}`)
-      .addLink('delete', `${Configuration.ROOT_PATH}/publishers/${data.id}`, 'DELETE')
-      .addLink('update', `${Configuration.ROOT_PATH}/publishers/${data.id}`, 'PUT')
-      .build();
+
+    const builder = new ResourceBuilder<IPublisherDTO>(PublisherDTO, data)
+      .addLink('self', `${Configuration.ROOT_PATH}/publishers/${data.id}`);
+
+    if (req.isAuthenticated()) {
+      builder
+        .addLink('delete', `${Configuration.ROOT_PATH}/publishers/${data.id}`, 'DELETE')
+        .addLink('update', `${Configuration.ROOT_PATH}/publishers/${data.id}`, 'PUT');
+    }
+
+    return builder.build();
   }
 
   public id: number | null;

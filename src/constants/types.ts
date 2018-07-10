@@ -7,4 +7,6 @@ export const Types = {
   CategoryService: Symbol.for('CategoryService'),
   PublisherRepository: Symbol.for('PublisherRepository'),
   PublisherService: Symbol.for('PublisherService'),
+  UserRepository: Symbol.for('UserRepository'),
+  UserService: Symbol.for('UserService'),
 };
