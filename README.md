@@ -17,7 +17,7 @@ Table of Contents
 * [Docker Compose](#docker-compose)
 * [Deployment](#deployment)
 * [Database Migration](#database-migration)
-* [TODO](#todo)
+* [OAuth](#oauth)
 
 ## Prerequisites
 
@@ -25,6 +25,8 @@ You need to have the following programs installed on your machine:
 - [Node.js](https://nodejs.org/) (>= 8.11.3)
 - [Yarn](https://yarnpkg.com/)
 - [Docker](https://www.docker.com/)
+
+You need to have a registered [OAuth App on GitHub](https://developer.github.com/apps/building-oauth-apps/) as you need to provide the `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` environment variables for the application based on the unique values of your _GitHub_ application.
 
 Build the custom PostgreSQL image with the SQL scripts:
 ```sh
@@ -73,18 +75,27 @@ DATABASE_URL=
 # User for the database
 DATABASE_USER=postgres
 
+# The unique client id of your registered GitHub application
+GITHUB_CLIENT_ID=
+
+# The unique client secret of your registered GitHub application
+GITHUB_CLIENT_SECRET=
+
 # Environment in which the application is running 
 NODE_ENV=development
 
 # Port on which the Express server is running on
 PORT=3000
+
+# The secret which is being used to sign the session cookie to prevent tempering
+SESSION_SECRET=535510n_53cr37
 ```
 
 ## SQL
 
 The SQL scripts which are being used to create the database schema and to populate it with initial data can be found under the `sql` directory:
 
-- _01_tables.sql_: Creates the _book_, _author_, _category_, _publisher_, _book_category_, _book_author_ and _book_publisher_ tables
+- _01_tables.sql_: Creates the _book_, _author_, _category_, _publisher_, _book_category_, _book_author_, _book_publisher_ and _users_ tables
 - _02_author.sql_: Populates the _author_ table with authors
 - _03_book.sql_: Populates the _book_ table with books
 - _04_category.sql_: Populates the _category_ table with categories
@@ -201,17 +212,15 @@ Once our application is deployed to _Heroku_ we need to do the database migratio
 
 _Note_: This step depends on the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) therefore it has to be installed on your machine
 
-## TODO
+## OAuth
 
-- [X] Set up Travis CI
-- [X] Add build status badge
-- [X] Add coverage badge
-- [X] Deploy the application to Heroku
-- [X] Implement pagination for _getBooks_
-- [X] Implement filtering for _getBooks_
-- [X] Implement filtering for _getAuthors_
-- [X] Implement filtering for _getCategories_
-- [X] Implement filtering for _getPublishers_
-- [X] Implement HATEOAS
-- [ ] Implement OAuth
-- [ ] Increase test coverage
+_GitHub_ is the OAuth service provider for this project therefore you'll need a registered [OAuth App on GitHub](https://developer.github.com/apps/building-oauth-apps/) in order to run this application.
+
+Once you log in with your _GitHub_ credentials and grant permissions to the app you'll be able to do the following actions:
+- _Create_, _update_ and _delete_ authors
+- _Create_, _update_ and _delete_ books
+- _Create_, _update_ and _delete_ categories
+- _Create_, _update_ and _delete_ publishers
+- Get your own _GitHub_ profile information
+
+Without logging in you can _list_ and _view_ all of the above mentioned entities in the system.

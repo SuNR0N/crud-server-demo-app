@@ -1,22 +1,176 @@
 {
 	"info": {
-		"_postman_id": "7882ec89-0b5b-493e-93f8-75acab9fc9bd",
-		"name": "CRUD Server Demo App",
+		"_postman_id": "6c7ace26-5cb7-4ce3-bc6c-4d2215471c18",
+		"name": "CRUD Server Demo Application API",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Authors",
-			"description": "",
+			"name": "auth",
+			"description": "Folder for auth",
+			"item": [
+				{
+					"name": "Initiate OAuth with GitHub",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/auth/github",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"github"
+							]
+						},
+						"description": "Initiates the OAuth authentication process with GitHub"
+					},
+					"response": []
+				},
+				{
+					"name": "GitHub authentication callback",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/auth/github/callback?code={{code}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"github",
+								"callback"
+							],
+							"query": [
+								{
+									"key": "code",
+									"value": "{{code}}"
+								}
+							]
+						},
+						"description": "The registered callback URL of the OAuth GitHub application identified by the provided client id"
+					},
+					"response": []
+				},
+				{
+					"name": "Get user profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/auth/profile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"profile"
+							]
+						},
+						"description": "Returns the simplified user profile of the authenticated user"
+					},
+					"response": []
+				},
+				{
+					"name": "Log out current user",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/auth/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Destroys the session of the currently logged in user"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "authors",
+			"description": "Folder for authors",
 			"item": [
 				{
 					"name": "Get authors",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {},
 						"url": {
-							"raw": "http://localhost:3000/api/v1/authors",
+							"raw": "http://localhost:3000/api/v1/authors?q={{q}}",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -26,8 +180,15 @@
 								"api",
 								"v1",
 								"authors"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "{{q}}"
+								}
 							]
-						}
+						},
+						"description": "Retrieves the available authors in the system in a filterable fashion"
 					},
 					"response": []
 				},
@@ -37,13 +198,17 @@
 						"method": "POST",
 						"header": [
 							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"firstName\": \"string\",\n  \"middleName\": \"string\",\n  \"lastName\": \"string\"\n}"
+							"raw": "Properties of the new author to create"
 						},
 						"url": {
 							"raw": "http://localhost:3000/api/v1/authors",
@@ -57,7 +222,8 @@
 								"v1",
 								"authors"
 							]
-						}
+						},
+						"description": "Creates a new author in the system"
 					},
 					"response": []
 				},
@@ -67,51 +233,15 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "Content-Type",
+								"key": "Accept",
 								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"firstName\": \"string\",\n  \"middleName\": \"string\",\n  \"lastName\": \"string\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:3000/api/v1/authors/:id",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"v1",
-								"authors",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": ""
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete author",
-					"request": {
-						"method": "DELETE",
-						"header": [
+							},
 							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"firstName\": \"string\",\n  \"middleName\": \"string\",\n  \"lastName\": \"string\"\n}"
-						},
+						"body": {},
 						"url": {
 							"raw": "http://localhost:3000/api/v1/authors/:id",
 							"protocol": "http",
@@ -124,14 +254,9 @@
 								"v1",
 								"authors",
 								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": ""
-								}
 							]
-						}
+						},
+						"description": "Retrieves an existing author from the system"
 					},
 					"response": []
 				},
@@ -141,13 +266,17 @@
 						"method": "PATCH",
 						"header": [
 							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"firstName\": \"string\",\n  \"middleName\": \"string\",\n  \"lastName\": \"string\"\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "http://localhost:3000/api/v1/authors/:id",
@@ -161,22 +290,50 @@
 								"v1",
 								"authors",
 								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": ""
-								}
 							]
-						}
+						},
+						"description": "Updates an existing author in the system"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete author",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/authors/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"authors",
+								":id"
+							]
+						},
+						"description": "Removes an existing author from the system"
 					},
 					"response": []
 				}
 			]
 		},
 		{
-			"name": "Books",
-			"description": "",
+			"name": "books",
+			"description": "Folder for books",
 			"item": [
 				{
 					"name": "Get books",
@@ -184,13 +341,17 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "accept",
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
 								"value": "application/json"
 							}
 						],
 						"body": {},
 						"url": {
-							"raw": "http://localhost:3000/api/v1/books",
+							"raw": "http://localhost:3000/api/v1/books?q={{q}}&offset=0&page-size=10",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -200,9 +361,23 @@
 								"api",
 								"v1",
 								"books"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "{{q}}"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								},
+								{
+									"key": "page-size",
+									"value": "10"
+								}
 							]
 						},
-						"description": "Generated from a curl request: \ncurl -X GET \\\"http://localhost:3000/api/v1/books\\\" -H \\\"accept: application/json\\\""
+						"description": "Retrieves the available books in the system in a paginated and filterable fashion"
 					},
 					"response": []
 				},
@@ -212,8 +387,8 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "accept",
-								"value": "*/*"
+								"key": "Accept",
+								"value": "application/json"
 							},
 							{
 								"key": "Content-Type",
@@ -222,7 +397,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"authors\": [\n    0\n  ],\n  \"categories\": [\n    0\n  ],\n  \"isbn10\": \"string\",\n  \"isbn13\": \"string\",\n  \"publicationDate\": \"string\",\n  \"publishers\": [\n    0\n  ],\n  \"title\": \"string\"\n}"
+							"raw": "Properties of the new book to create"
 						},
 						"url": {
 							"raw": "http://localhost:3000/api/v1/books",
@@ -237,7 +412,7 @@
 								"books"
 							]
 						},
-						"description": "Generated from a curl request: \ncurl -X POST \\\"http://localhost:3000/api/v1/books\\\" -H \\\"accept: */*\\\" -H \\\"Content-Type: application/json\\\" -d \\\"{\\\\\"isbn10\\\\\":\\\\\"string\\\\\",\\\\\"isbn13\\\\\":\\\\\"string\\\\\",\\\\\"publicationDate\\\\\":\\\\\"string\\\\\",\\\\\"title\\\\\":\\\\\"string\\\\\"}\\\""
+						"description": "Creates a new book in the system"
 					},
 					"response": []
 				},
@@ -247,7 +422,11 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "accept",
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
 								"value": "application/json"
 							}
 						],
@@ -264,50 +443,9 @@
 								"v1",
 								"books",
 								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": ""
-								}
 							]
 						},
-						"description": "Generated from a curl request: \ncurl -X GET \\\"http://localhost:3000/api/v1/books/:id\\\" -H \\\"accept: application/json\\\""
-					},
-					"response": []
-				},
-				{
-					"name": "Delete book",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "accept",
-								"value": "*/*"
-							}
-						],
-						"body": {},
-						"url": {
-							"raw": "http://localhost:3000/api/v1/books/:id",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"v1",
-								"books",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": ""
-								}
-							]
-						},
-						"description": "Generated from a curl request: \ncurl -X DELETE \\\"http://localhost:3000/api/v1/books/:id\\\" -H \\\"accept: */*\\\""
+						"description": "Retrieves an existing book from the system"
 					},
 					"response": []
 				},
@@ -317,7 +455,7 @@
 						"method": "PATCH",
 						"header": [
 							{
-								"key": "accept",
+								"key": "Accept",
 								"value": "application/json"
 							},
 							{
@@ -327,7 +465,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"authors\": [\n    0\n  ],\n  \"categories\": [\n    0\n  ],\n  \"isbn10\": \"string\",\n  \"isbn13\": \"string\",\n  \"publicationDate\": \"string\",\n  \"publishers\": [\n    0\n  ],\n  \"title\": \"string\"\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "http://localhost:3000/api/v1/books/:id",
@@ -341,32 +479,68 @@
 								"v1",
 								"books",
 								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": ""
-								}
 							]
 						},
-						"description": "Generated from a curl request: \ncurl -X PATCH \\\"http://localhost:3000/api/v1/books/:id\\\" -H \\\"accept: application/json\\\" -H \\\"Content-Type: application/json\\\" -d \\\"{}\\\""
+						"description": "Updates an existing book in the system"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete book",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/books/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"books",
+								":id"
+							]
+						},
+						"description": "Removes an existing book from the system"
 					},
 					"response": []
 				}
 			]
 		},
 		{
-			"name": "Categories",
-			"description": "",
+			"name": "categories",
+			"description": "Folder for categories",
 			"item": [
 				{
 					"name": "Get categories",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {},
 						"url": {
-							"raw": "http://localhost:3000/api/v1/categories",
+							"raw": "http://localhost:3000/api/v1/categories?q={{q}}",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -376,8 +550,15 @@
 								"api",
 								"v1",
 								"categories"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "{{q}}"
+								}
 							]
-						}
+						},
+						"description": "Retrieves the available categories in the system in a filterable fashion"
 					},
 					"response": []
 				},
@@ -387,13 +568,17 @@
 						"method": "POST",
 						"header": [
 							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"string\"\n}"
+							"raw": "Properties of the new category to create"
 						},
 						"url": {
 							"raw": "http://localhost:3000/api/v1/categories",
@@ -407,7 +592,8 @@
 								"v1",
 								"categories"
 							]
-						}
+						},
+						"description": "Creates a new category in the system"
 					},
 					"response": []
 				},
@@ -415,7 +601,16 @@
 					"name": "Get category",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {},
 						"url": {
 							"raw": "http://localhost:3000/api/v1/categories/:id",
@@ -429,43 +624,9 @@
 								"v1",
 								"categories",
 								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": ""
-								}
 							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete category",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"body": {},
-						"url": {
-							"raw": "http://localhost:3000/api/v1/categories/:id",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"v1",
-								"categories",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": ""
-								}
-							]
-						}
+						},
+						"description": "Retrieves an existing category from the system"
 					},
 					"response": []
 				},
@@ -475,13 +636,17 @@
 						"method": "PUT",
 						"header": [
 							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"string\"\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "http://localhost:3000/api/v1/categories/:id",
@@ -495,31 +660,68 @@
 								"v1",
 								"categories",
 								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": ""
-								}
 							]
-						}
+						},
+						"description": "Updates an existing category in the system"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete category",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/categories/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"categories",
+								":id"
+							]
+						},
+						"description": "Removes an existing category from the system"
 					},
 					"response": []
 				}
 			]
 		},
 		{
-			"name": "Publishers",
-			"description": "",
+			"name": "publishers",
+			"description": "Folder for publishers",
 			"item": [
 				{
 					"name": "Get publishers",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
 						"body": {},
 						"url": {
-							"raw": "http://localhost:3000/api/v1/publishers",
+							"raw": "http://localhost:3000/api/v1/publishers?q={{q}}",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -529,8 +731,15 @@
 								"api",
 								"v1",
 								"publishers"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "{{q}}"
+								}
 							]
-						}
+						},
+						"description": "Retrieves the available publishers in the system in a filterable fashion"
 					},
 					"response": []
 				},
@@ -540,13 +749,17 @@
 						"method": "POST",
 						"header": [
 							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"string\"\n}"
+							"raw": "Properties of the new publisher to create"
 						},
 						"url": {
 							"raw": "http://localhost:3000/api/v1/publishers",
@@ -560,7 +773,8 @@
 								"v1",
 								"publishers"
 							]
-						}
+						},
+						"description": "Creates a new publisher in the system"
 					},
 					"response": []
 				},
@@ -570,51 +784,15 @@
 						"method": "GET",
 						"header": [
 							{
-								"key": "Content-Type",
+								"key": "Accept",
 								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"string\"\n}"
-						},
-						"url": {
-							"raw": "http://localhost:3000/api/v1/publishers/:id",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "3000",
-							"path": [
-								"api",
-								"v1",
-								"publishers",
-								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": ""
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete publisher",
-					"request": {
-						"method": "DELETE",
-						"header": [
+							},
 							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"string\"\n}"
-						},
+						"body": {},
 						"url": {
 							"raw": "http://localhost:3000/api/v1/publishers/:id",
 							"protocol": "http",
@@ -627,14 +805,9 @@
 								"v1",
 								"publishers",
 								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": ""
-								}
 							]
-						}
+						},
+						"description": "Retrieves an existing publisher from the system"
 					},
 					"response": []
 				},
@@ -644,13 +817,17 @@
 						"method": "PUT",
 						"header": [
 							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
 								"key": "Content-Type",
 								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"string\"\n}"
+							"raw": ""
 						},
 						"url": {
 							"raw": "http://localhost:3000/api/v1/publishers/:id",
@@ -664,14 +841,42 @@
 								"v1",
 								"publishers",
 								":id"
-							],
-							"variable": [
-								{
-									"key": "id",
-									"value": ""
-								}
 							]
-						}
+						},
+						"description": "Updates an existing publisher in the system"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete publisher",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/publishers/:id",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"publishers",
+								":id"
+							]
+						},
+						"description": "Removes an existing publisher from the system"
 					},
 					"response": []
 				}

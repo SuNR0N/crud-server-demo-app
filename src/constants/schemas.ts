@@ -1,5 +1,8 @@
 import Joi from 'joi';
 
+const PROPERTY = 'property';
+const QUERY_PARAMETER = 'query parameter';
+
 const Authors = Joi.array().items(Joi.number())
   .error(new Error("The property 'authors' must contain numbers only"));
 const Categories = Joi.array().items(Joi.number())
@@ -23,20 +26,22 @@ const Publishers = Joi.array().items(Joi.number())
 const Title = Joi.string().required()
   .error(new Error("The property 'title' is required"));
 
-const objectValidator: Joi.ValidationErrorFunction = (errors) => {
-  for (const error of errors) {
-    if (error.type === 'object.allowUnknown' && error.context) {
-      return new Error(`The property '${error.context.key}' is not allowed`);
+function objectValidator(name: string = PROPERTY): Joi.ValidationErrorFunction {
+  return (errors) => {
+    for (const error of errors) {
+      if (error.type === 'object.allowUnknown' && error.context) {
+        return new Error(`The ${name} '${error.context.key}' is not allowed`);
+      }
     }
-  }
-  return errors;
-};
+    return errors;
+  };
+}
 
 const AuthorUpdate = Joi.object().keys({
   firstName: Joi.string(),
   lastName: Joi.string(),
   middleName: Joi.string(),
-}).error(objectValidator);
+}).error(objectValidator());
 const BookUpdate = Joi.object().keys({
   authors: Authors,
   categories: Categories,
@@ -45,29 +50,29 @@ const BookUpdate = Joi.object().keys({
   publicationDate: Joi.string(),
   publishers: Publishers,
   title: Joi.string(),
-}).error(objectValidator);
+}).error(objectValidator());
 const Category = Joi.object().keys({
   name: Name,
-}).error(objectValidator);
+}).error(objectValidator());
 const GetAuthorsQuery = Joi.object().keys({
   q: Joi.string(),
-});
+}).error(objectValidator(QUERY_PARAMETER));
 const GetBooksQuery = Joi.object().keys({
   'offset': Offset,
   'page-size': PageSize,
   'q': Joi.string(),
-});
+}).error(objectValidator(QUERY_PARAMETER));
 const GetCategoriesQuery = Joi.object().keys({
   q: Joi.string(),
-});
+}).error(objectValidator(QUERY_PARAMETER));
 const GetPublishersQuery = Joi.object().keys({
   q: Joi.string(),
-});
+}).error(objectValidator(QUERY_PARAMETER));
 const NewAuthor = Joi.object().keys({
   firstName: FirstName,
   lastName: LastName,
   middleName: Joi.string(),
-}).error(objectValidator);
+}).error(objectValidator());
 const NewBook = Joi.object().keys({
   authors: Authors,
   categories: Categories,
@@ -76,10 +81,10 @@ const NewBook = Joi.object().keys({
   publicationDate: Joi.string(),
   publishers: Publishers,
   title: Title,
-}).error(objectValidator);
+}).error(objectValidator());
 const Publisher = Joi.object().keys({
   name: Name,
-}).error(objectValidator);
+}).error(objectValidator());
 
 export const Schemas = {
   AuthorUpdate,

@@ -1,6 +1,6 @@
 export class ValidationError extends Error {
   constructor(message: string) {
-    super(message);
+    super(message) /* istanbul ignore next */;
     Object.setPrototypeOf(this, ValidationError.prototype);
   }
 }

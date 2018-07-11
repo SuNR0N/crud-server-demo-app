@@ -5,6 +5,7 @@ import {
 import {
   controller,
   httpGet,
+  httpPost,
   request,
   response,
 } from 'inversify-express-utils';
@@ -40,12 +41,12 @@ export class AuthController implements IAuthController {
     res.redirect('/api/v1/books');
   }
 
-  @httpGet('/logout')
+  @httpPost('/logout')
   public logout(
     @request() req: Request,
     @response() res: Response,
   ) {
     req.logout();
-    res.redirect('/api/v1/books');
+    res.send('Successfully logged out');
   }
 }

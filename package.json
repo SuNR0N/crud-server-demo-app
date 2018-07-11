@@ -8,12 +8,16 @@
   "keywords": [
     "Docker",
     "Express.js",
+    "HATEOAS",
     "InversifyJS",
     "Jest",
     "Joi",
     "Node.js",
+    "Passport",
     "PostgreSQL",
+    "SuperTest",
     "Swagger",
+    "TypeORM",
     "TypeScript",
     "Winston"
   ],
@@ -80,6 +84,12 @@
     "coveragePathIgnorePatterns": [
       "<rootDir>/node_modules/",
       "<rootDir>/test/"
-    ]
+    ],
+    "globals": {
+      "ts-jest": {
+        "ignoreCoverageForDecorators": true,
+        "ignoreCoverageForAllDecorators": true
+      }
+    }
   }
 }

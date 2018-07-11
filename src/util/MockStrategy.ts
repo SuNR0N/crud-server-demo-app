@@ -30,7 +30,7 @@ export class MockStrategy extends Strategy {
         { value: 'https://avatars1.githubusercontent.com/u/4305472?v=4' },
       ],
       provider: this.name,
-      username: 'J04n_D03',
+      username: 'J0hn_D03',
     };
   }
 

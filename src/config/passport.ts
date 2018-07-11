@@ -27,9 +27,9 @@ export function configurePassort(passport: PassportStatic, userService: UserServ
         break;
       default:
         strategy = new GitHubStrategy({
-          callbackURL: Configuration.OAUTH_CALLBACK_URL,
-          clientID: Configuration.OAUTH_CLIENT_ID,
-          clientSecret: Configuration.OAUTH_CLIENT_SECRET,
+          callbackURL: Configuration.GITHUB_CALLBACK_URL,
+          clientID: Configuration.GITHUB_CLIENT_ID,
+          clientSecret: Configuration.GITHUB_CLIENT_SECRET,
         }, verify);
         break;
     }
@@ -49,6 +49,8 @@ export function configurePassort(passport: PassportStatic, userService: UserServ
       if (error instanceof EntityNotFoundError) {
         const dto = new UserDTO(profile);
         user = await userService.createUser(dto);
+      } else {
+        return done(error);
       }
     }
     return done(null, user!);

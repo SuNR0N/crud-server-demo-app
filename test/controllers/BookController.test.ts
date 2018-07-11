@@ -64,6 +64,15 @@ describe('BookController', () => {
       expect(response.text).toBe("The query parameter 'page-size' must be a number");
     });
 
+    it('should return a 400 for an unknown query parameter', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/books')
+        .query({ foo: 'bar' });
+
+      expect(response.status).toBe(400);
+      expect(response.text).toBe("The query parameter 'foo' is not allowed");
+    });
+
     it('should return a book if there is a partial match on the title', async () => {
       const response = await agent(serverInstance)
         .get('/api/v1/books')
@@ -382,7 +391,7 @@ describe('BookController', () => {
           .post('/api/v1/books');
 
         expect(response.status).toBe(403);
-        expect(response.text).toEqual('Forbidden');
+        expect(response.text).toBe('Forbidden');
       });
     });
 
@@ -398,8 +407,7 @@ describe('BookController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'isbn13' is required");
+        expect(response.text).toBe("The property 'isbn13' is required");
       });
 
       it('should return a 400 if the title is missing', async () => {
@@ -413,8 +421,7 @@ describe('BookController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'title' is required");
+        expect(response.text).toBe("The property 'title' is required");
       });
 
       it('should return a 400 if the request body contains unknown properties', async () => {
@@ -430,8 +437,7 @@ describe('BookController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'foo' is not allowed");
+        expect(response.text).toBe("The property 'foo' is not allowed");
       });
 
       it('should return a 400 if a provided author does not exist', async () => {
@@ -450,8 +456,7 @@ describe('BookController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual('A foreign key constraint violation occurred. Author with ID = 999 does not exist');
+        expect(response.text).toBe('A foreign key constraint violation occurred. Author with ID = 999 does not exist');
       });
 
       it('should return a 400 if a provided author has an invalid type', async () => {
@@ -470,8 +475,7 @@ describe('BookController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'authors' must contain numbers only");
+        expect(response.text).toBe("The property 'authors' must contain numbers only");
       });
 
       it('should return a 400 if a provided category does not exist', async () => {
@@ -491,7 +495,7 @@ describe('BookController', () => {
 
         expect(response.status).toBe(400);
         expect(response.text)
-          .toEqual('A foreign key constraint violation occurred. Category with ID = 999 does not exist');
+          .toBe('A foreign key constraint violation occurred. Category with ID = 999 does not exist');
       });
 
       it('should return a 400 if a provided category has an invalid type', async () => {
@@ -510,8 +514,7 @@ describe('BookController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'categories' must contain numbers only");
+        expect(response.text).toBe("The property 'categories' must contain numbers only");
       });
 
       it('should return a 400 if a provided publisher does not exist', async () => {
@@ -531,7 +534,7 @@ describe('BookController', () => {
 
         expect(response.status).toBe(400);
         expect(response.text)
-          .toEqual('A foreign key constraint violation occurred. Publisher with ID = 999 does not exist');
+          .toBe('A foreign key constraint violation occurred. Publisher with ID = 999 does not exist');
       });
 
       it('should return a 400 if a provided publisher has an invalid type', async () => {
@@ -550,8 +553,7 @@ describe('BookController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'publishers' must contain numbers only");
+        expect(response.text).toBe("The property 'publishers' must contain numbers only");
       });
 
       it('should return a 409 if a book already exists with the provided isbn13', async () => {
@@ -567,7 +569,7 @@ describe('BookController', () => {
 
         expect(response.status).toBe(409);
         expect(response.text)
-        .toEqual('A unique constraint violation occurred. Key (isbn_13) with value (9780596517748) already exists');
+          .toBe('A unique constraint violation occurred. Key (isbn_13) with value (9780596517748) already exists');
       });
 
       describe('and it creates the book', () => {
@@ -675,8 +677,7 @@ describe('BookController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'foo' is not allowed");
+        expect(response.text).toBe("The property 'foo' is not allowed");
       });
 
       it('should return a 400 if a provided author does not exist', async () => {
@@ -693,8 +694,7 @@ describe('BookController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual('A foreign key constraint violation occurred. Author with ID = 999 does not exist');
+        expect(response.text).toBe('A foreign key constraint violation occurred. Author with ID = 999 does not exist');
       });
 
       it('should return a 400 if a provided author has an invalid type', async () => {
@@ -713,8 +713,7 @@ describe('BookController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'authors' must contain numbers only");
+        expect(response.text).toBe("The property 'authors' must contain numbers only");
       });
 
       it('should return a 400 if a provided category does not exist', async () => {
@@ -732,7 +731,7 @@ describe('BookController', () => {
 
         expect(response.status).toBe(400);
         expect(response.text)
-          .toEqual('A foreign key constraint violation occurred. Category with ID = 999 does not exist');
+          .toBe('A foreign key constraint violation occurred. Category with ID = 999 does not exist');
       });
 
       it('should return a 400 if a provided category has an invalid type', async () => {
@@ -749,8 +748,7 @@ describe('BookController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'categories' must contain numbers only");
+        expect(response.text).toBe("The property 'categories' must contain numbers only");
       });
 
       it('should return a 400 if a provided publisher does not exist', async () => {
@@ -768,7 +766,7 @@ describe('BookController', () => {
 
         expect(response.status).toBe(400);
         expect(response.text)
-          .toEqual('A foreign key constraint violation occurred. Publisher with ID = 999 does not exist');
+          .toBe('A foreign key constraint violation occurred. Publisher with ID = 999 does not exist');
       });
 
       it('should return a 400 if a provided publisher has an invalid type', async () => {
@@ -785,8 +783,7 @@ describe('BookController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'publishers' must contain numbers only");
+        expect(response.text).toBe("The property 'publishers' must contain numbers only");
       });
 
       it('should return the updated publisher if it succeeds', async () => {

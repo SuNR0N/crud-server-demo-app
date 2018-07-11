@@ -4,7 +4,7 @@ export class ForeignKeyConstraintError extends Error {
     public id: string | null = null,
     public table: string | null = null,
   ) {
-    super(constraint);
+    super(constraint) /* istanbul ignore next */;
     Object.setPrototypeOf(this, ForeignKeyConstraintError.prototype);
     if (this.id && this.table) {
       // tslint:disable-next-line:max-line-length

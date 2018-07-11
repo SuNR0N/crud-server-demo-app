@@ -111,6 +111,15 @@ describe('AuthorController', () => {
         }),
       ]);
     });
+
+    it('should return a 400 for an unknown query parameter', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/authors')
+        .query({ foo: 'bar' });
+
+      expect(response.status).toBe(400);
+      expect(response.text).toBe("The query parameter 'foo' is not allowed");
+    });
   });
 
   describe('getAuthor', () => {
@@ -207,8 +216,7 @@ describe('AuthorController', () => {
           .post('/api/v1/authors');
 
         expect(response.status).toBe(403);
-        expect(response.text)
-          .toEqual('Forbidden');
+        expect(response.text).toBe('Forbidden');
         });
     });
 
@@ -224,8 +232,7 @@ describe('AuthorController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'firstName' is required");
+        expect(response.text).toBe("The property 'firstName' is required");
       });
 
       it('should return a 400 if the lastName is missing', async () => {
@@ -239,8 +246,7 @@ describe('AuthorController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'lastName' is required");
+        expect(response.text).toBe("The property 'lastName' is required");
       });
 
       it('should return a 400 if the request body contains unknown properties', async () => {
@@ -256,8 +262,7 @@ describe('AuthorController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'foo' is not allowed");
+        expect(response.text).toBe("The property 'foo' is not allowed");
       });
 
       describe('and it creates the author', () => {
@@ -337,8 +342,7 @@ describe('AuthorController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'foo' is not allowed");
+        expect(response.text).toBe("The property 'foo' is not allowed");
       });
 
       it('should return the updated author if it succeeds', async () => {

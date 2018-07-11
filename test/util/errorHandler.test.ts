@@ -99,8 +99,8 @@ describe('errorHandler', () => {
     // tslint:disable-next-line:max-line-length
     it('should throw a UniqueConstraintError given it has a constraint property and the message matches the regular expression', () => {
       const error = {
-        constraint: 'fk_123',
-        message: 'duplicate key value violates unique constraint "fk_123"',
+        constraint: 'u_123',
+        message: 'duplicate key value violates unique constraint "u_123"',
       };
       expect(() => {
         dbErrorHandler(error);
@@ -109,9 +109,9 @@ describe('errorHandler', () => {
 
     it('should throw a UniqueConstraintError with details if the error has more details', () => {
       const error = {
-        constraint: 'fk_123',
+        constraint: 'u_123',
         detail: 'Key (foo)=(1234) already exists.',
-        message: 'duplicate key value violates unique constraint "fk_123"',
+        message: 'duplicate key value violates unique constraint "u_123"',
       };
       expect(() => {
         dbErrorHandler(error);
@@ -120,6 +120,7 @@ describe('errorHandler', () => {
 
     it('should not throw an error given the message does not match the regular expressions', () => {
       const error = {
+        constraint: '123',
         message: 'null value in column "id" violates not-null constraint',
       };
 

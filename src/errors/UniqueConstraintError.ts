@@ -4,7 +4,7 @@ export class UniqueConstraintError extends Error {
     public key: string | null = null,
     public value: string | null = null,
   ) {
-    super(constraint);
+    super(constraint) /* istanbul ignore next */;
     Object.setPrototypeOf(this, UniqueConstraintError.prototype);
     if (this.key && this.value) {
       // tslint:disable-next-line:max-line-length

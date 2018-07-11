@@ -53,6 +53,15 @@ describe('CategoryController', () => {
         }),
       ]);
     });
+
+    it('should return a 400 for an unknown query parameter', async () => {
+      const response = await agent(serverInstance)
+        .get('/api/v1/categories')
+        .query({ foo: 'bar' });
+
+      expect(response.status).toBe(400);
+      expect(response.text).toBe("The query parameter 'foo' is not allowed");
+    });
   });
 
   describe('getCategory', () => {
@@ -146,7 +155,7 @@ describe('CategoryController', () => {
           .post('/api/v1/categories');
 
         expect(response.status).toBe(403);
-        expect(response.text).toEqual('Forbidden');
+        expect(response.text).toBe('Forbidden');
       });
     });
 
@@ -159,8 +168,7 @@ describe('CategoryController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'name' is required");
+        expect(response.text).toBe("The property 'name' is required");
       });
 
       it('should return a 400 if the request body contains unknown properties', async () => {
@@ -175,8 +183,7 @@ describe('CategoryController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'foo' is not allowed");
+        expect(response.text).toBe("The property 'foo' is not allowed");
       });
 
       describe('and it creates the category', () => {
@@ -248,8 +255,7 @@ describe('CategoryController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'name' is required");
+        expect(response.text).toBe("The property 'name' is required");
       });
 
       it('should return a 400 if the request body contains unknown properties', async () => {
@@ -264,8 +270,7 @@ describe('CategoryController', () => {
         );
 
         expect(response.status).toBe(400);
-        expect(response.text)
-          .toEqual("The property 'foo' is not allowed");
+        expect(response.text).toBe("The property 'foo' is not allowed");
       });
 
       it('should return the updated category if it succeeds', async () => {

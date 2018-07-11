@@ -3,7 +3,7 @@ export class EntityNotFoundError<T> extends Error {
   public entity: string;
 
   constructor(entity: { new(): T }, id: any) {
-    super();
+    super() /* istanbul ignore next */;
     Object.setPrototypeOf(this, EntityNotFoundError.prototype);
     this.id = id;
     this.entity = entity.name;
