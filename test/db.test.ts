@@ -1,3 +1,5 @@
+import { Configuration } from '../src/config';
+
 describe('db', () => {
   describe('getDbConnection', () => {
     const environmentVariables = process.env;
@@ -40,7 +42,7 @@ describe('db', () => {
       expect(createConnectionMock).toHaveBeenCalledWith(expect.objectContaining({
         host: 'localhost',
         password: 'pw',
-        port: 5432,
+        port: Configuration.DATABASE_PORT,
         ssl: false,
         synchronize: false,
         type: 'postgres',
