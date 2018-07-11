@@ -1,7 +1,7 @@
 # CRUD Server Demo Application
 
 [![Build Status](https://travis-ci.org/SuNR0N/crud-server-demo-app.svg?branch=master)](https://travis-ci.org/SuNR0N/crud-server-demo-app)
-[![Coverage Status](https://coveralls.io/repos/github/SuNR0N/crud-server-demo-app/badge.svg?branch=master)](https://coveralls.io/github/SuNR0N/crud-server-demo-app?branch=master)
+[![Coverage Status](https://img.shields.io/coveralls/github/SuNR0N/crud-server-demo-app.svg)](https://coveralls.io/github/SuNR0N/crud-server-demo-app?branch=master)
 
 Table of Contents
 =================
