@@ -26,7 +26,7 @@ You need to have the following programs installed on your machine:
 - [Yarn](https://yarnpkg.com/)
 - [Docker](https://www.docker.com/)
 
-You need to have a registered [OAuth App on GitHub](https://developer.github.com/apps/building-oauth-apps/) as you need to provide the `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` environment variables for the application based on the unique values of your _GitHub_ application.
+You need to have a registered [OAuth App on GitHub](https://developer.github.com/apps/building-oauth-apps/) as you need to provide the `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` environment variables for the application (unless running it in _test_ mode) based on the unique values of your _GitHub_ application.
 
 Build the custom PostgreSQL image with the SQL scripts:
 ```sh
@@ -224,3 +224,5 @@ Once you log in with your _GitHub_ credentials and grant permissions to the app 
 - Get your own _GitHub_ profile information
 
 Without logging in you can _list_ and _view_ all of the above mentioned entities in the system.
+
+_Note_: You can turn off _GitHub_ authentication by running the application in _test_ mode: `NODE_ENV=test yarn start`
