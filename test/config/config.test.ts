@@ -202,6 +202,22 @@ describe('Configuration', () => {
     });
   });
 
+  describe('REDIRECT_URL', () => {
+    it('should be set to the environment variable with the same name if defined', async () => {
+      process.env.REDIRECT_URL = '/';
+      const { Configuration } = await import('../../src/config/config');
+
+      expect(Configuration.REDIRECT_URL).toBe('/');
+    });
+
+    it('should default to "/api/v1/books" if the environment variable does not exist', async () => {
+      delete process.env.REDIRECT_URL;
+      const { Configuration } = await import('../../src/config/config');
+
+      expect(Configuration.REDIRECT_URL).toBe('/api/v1/books');
+    });
+  });
+
   describe('ROOT_PATH', () => {
     it('should be set to "/api/v1"', async () => {
       const { Configuration } = await import('../../src/config/config');

@@ -14,6 +14,7 @@ export interface IConfiguration {
   GITHUB_CLIENT_ID: string;
   GITHUB_CLIENT_SECRET: string;
   PORT: number;
+  REDIRECT_URL: string;
   ROOT_PATH: string;
   SESSION_SECRET: string;
   SWAGGER_SPEC_PATH: string;
@@ -33,6 +34,7 @@ export const Configuration: IConfiguration = {
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID!,
   GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET!,
   PORT: process.env.PORT ? Number(process.env.PORT) : 3000,
+  REDIRECT_URL: process.env.REDIRECT_URL || '/api/v1/books',
   ROOT_PATH: '/api/v1',
   SESSION_SECRET: process.env.SESSION_SECRET || '535510n_53cr37',
   SWAGGER_SPEC_PATH: resolve(__dirname, '../../swagger/swagger.yaml'),

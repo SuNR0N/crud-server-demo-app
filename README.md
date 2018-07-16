@@ -89,6 +89,9 @@ PORT=3000
 
 # The secret which is being used to sign the session cookie to prevent tempering
 SESSION_SECRET=535510n_53cr37
+
+# Redirect URL after a successful authentication
+REDIRECT_URL=/api/v1/books
 ```
 
 ## SQL
