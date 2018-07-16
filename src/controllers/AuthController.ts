@@ -11,6 +11,7 @@ import {
 } from 'inversify-express-utils';
 import passport from 'passport';
 
+import { Configuration } from '../config';
 import { isAuthenticated } from '../config/passport';
 import { UserDTO } from '../dtos/UserDTO';
 
@@ -38,7 +39,7 @@ export class AuthController implements IAuthController {
   public async callback(
     @response() res: Response,
   ): Promise<void> {
-    res.redirect('/api/v1/books');
+    res.redirect(Configuration.REDIRECT_URL);
   }
 
   @httpPost('/logout')
