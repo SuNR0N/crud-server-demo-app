@@ -365,6 +365,22 @@ describe('AuthorController', () => {
           middleName: null,
         }));
       });
+
+      it('should set the middleName to null if an empty string was provided', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/authors/13')
+            .send({
+              middleName: '',
+            }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(expect.objectContaining({
+          middleName: null,
+        }));
+      });
     });
   });
 

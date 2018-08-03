@@ -132,7 +132,7 @@ export class BookController implements IBookController {
       } else if (validationResultBookUpdate.error) {
         throw new ValidationError(validationResultBookUpdate.error.message);
       }
-      const updatedBook = await this.bookService.updateBook(id, new BookUpdateDTO(bookUpdate));
+      const updatedBook = await this.bookService.updateBook(id, new BookUpdateDTO(validationResultBookUpdate.value));
       return BookDTO.toDTO(updatedBook, req);
     } catch (error) {
       errorHandler(error, res);

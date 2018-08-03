@@ -787,8 +787,6 @@ describe('BookController', () => {
       });
 
       it('should return the updated publisher if it succeeds', async () => {
-        // Sequence is incremented on failed insert
-        await TestUtils.resetDatabase();
         const response = await TestUtils.createAuthenticatedUser(
           serverInstance,
           agent(serverInstance)
@@ -820,6 +818,39 @@ describe('BookController', () => {
             'Addison Wesley',
           ],
           title: 'FooBar',
+        }));
+      });
+
+      it('should be able to remove the publicationDate', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/books/2')
+            .send({
+              publicationDate: null,
+            }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(expect.objectContaining({
+          id: 2,
+          publicationDate: null,
+        }));
+      });
+
+      it('should set the isbn10 to null if an empty string was provided', async () => {
+        const response = await TestUtils.createAuthenticatedUser(
+          serverInstance,
+          agent(serverInstance)
+            .patch('/api/v1/books/2')
+            .send({
+              isbn10: '',
+            }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(expect.objectContaining({
+          isbn10: null,
         }));
       });
     });

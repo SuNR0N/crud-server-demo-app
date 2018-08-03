@@ -3,27 +3,37 @@ import Joi from 'joi';
 const PROPERTY = 'property';
 const QUERY_PARAMETER = 'query parameter';
 
-const Authors = Joi.array().items(Joi.number())
+interface ICustomJoi extends Joi.Root {
+  coerceNull(): Joi.StringSchema;
+}
+
+const CustomJoi: ICustomJoi = Joi.extend({
+  base: Joi.string().allow(null),
+  coerce: (value, state, options) => value === '' ? null : value,
+  name: 'coerceNull',
+});
+
+const Authors = CustomJoi.array().items(CustomJoi.number())
   .error(new Error("The property 'authors' must contain numbers only"));
-const Categories = Joi.array().items(Joi.number())
+const Categories = CustomJoi.array().items(CustomJoi.number())
   .error(new Error("The property 'categories' must contain numbers only"));
-const FirstName = Joi.string().required()
+const FirstName = CustomJoi.string().required()
   .error(new Error("The property 'firstName' is required"));
-const Id = Joi.number()
+const Id = CustomJoi.number()
   .error(new Error("The path parameter 'id' must be a number"));
-const ISBN13 = Joi.string().required()
+const ISBN13 = CustomJoi.string().required()
   .error(new Error("The property 'isbn13' is required"));
-const LastName = Joi.string().required()
+const LastName = CustomJoi.string().required()
   .error(new Error("The property 'lastName' is required"));
-const Name = Joi.string().required()
+const Name = CustomJoi.string().required()
   .error(new Error("The property 'name' is required"));
-const Offset = Joi.number()
+const Offset = CustomJoi.number()
   .error(new Error("The query parameter 'offset' must be a number"));
-const PageSize = Joi.number()
+const PageSize = CustomJoi.number()
   .error(new Error("The query parameter 'page-size' must be a number"));
-const Publishers = Joi.array().items(Joi.number())
+const Publishers = CustomJoi.array().items(CustomJoi.number())
   .error(new Error("The property 'publishers' must contain numbers only"));
-const Title = Joi.string().required()
+const Title = CustomJoi.string().required()
   .error(new Error("The property 'title' is required"));
 
 function objectValidator(name: string = PROPERTY): Joi.ValidationErrorFunction {
@@ -37,52 +47,52 @@ function objectValidator(name: string = PROPERTY): Joi.ValidationErrorFunction {
   };
 }
 
-const AuthorUpdate = Joi.object().keys({
-  firstName: Joi.string(),
-  lastName: Joi.string(),
-  middleName: Joi.string(),
+const AuthorUpdate = CustomJoi.object().keys({
+  firstName: CustomJoi.string(),
+  lastName: CustomJoi.string(),
+  middleName: CustomJoi.coerceNull().allow(''),
 }).error(objectValidator());
-const BookUpdate = Joi.object().keys({
+const BookUpdate = CustomJoi.object().keys({
   authors: Authors,
   categories: Categories,
-  isbn10: Joi.string(),
-  isbn13: Joi.string(),
-  publicationDate: Joi.string(),
+  isbn10: CustomJoi.coerceNull().allow(''),
+  isbn13: CustomJoi.string(),
+  publicationDate: CustomJoi.string().allow(null),
   publishers: Publishers,
-  title: Joi.string(),
+  title: CustomJoi.string(),
 }).error(objectValidator());
-const Category = Joi.object().keys({
+const Category = CustomJoi.object().keys({
   name: Name,
 }).error(objectValidator());
-const GetAuthorsQuery = Joi.object().keys({
-  q: Joi.string(),
+const GetAuthorsQuery = CustomJoi.object().keys({
+  q: CustomJoi.string(),
 }).error(objectValidator(QUERY_PARAMETER));
-const GetBooksQuery = Joi.object().keys({
+const GetBooksQuery = CustomJoi.object().keys({
   'offset': Offset,
   'page-size': PageSize,
-  'q': Joi.string(),
+  'q': CustomJoi.string(),
 }).error(objectValidator(QUERY_PARAMETER));
-const GetCategoriesQuery = Joi.object().keys({
-  q: Joi.string(),
+const GetCategoriesQuery = CustomJoi.object().keys({
+  q: CustomJoi.string(),
 }).error(objectValidator(QUERY_PARAMETER));
-const GetPublishersQuery = Joi.object().keys({
-  q: Joi.string(),
+const GetPublishersQuery = CustomJoi.object().keys({
+  q: CustomJoi.string(),
 }).error(objectValidator(QUERY_PARAMETER));
-const NewAuthor = Joi.object().keys({
+const NewAuthor = CustomJoi.object().keys({
   firstName: FirstName,
   lastName: LastName,
-  middleName: Joi.string(),
+  middleName: CustomJoi.string(),
 }).error(objectValidator());
-const NewBook = Joi.object().keys({
+const NewBook = CustomJoi.object().keys({
   authors: Authors,
   categories: Categories,
-  isbn10: Joi.string(),
+  isbn10: CustomJoi.string(),
   isbn13: ISBN13,
-  publicationDate: Joi.string(),
+  publicationDate: CustomJoi.string(),
   publishers: Publishers,
   title: Title,
 }).error(objectValidator());
-const Publisher = Joi.object().keys({
+const Publisher = CustomJoi.object().keys({
   name: Name,
 }).error(objectValidator());
 

@@ -119,7 +119,10 @@ export class AuthorController implements IAuthorController {
       } else if (validationResultAuthorUpdate.error) {
         throw new ValidationError(validationResultAuthorUpdate.error.message);
       }
-      const updatedAuthor = await this.authorService.updateAuthor(id, new AuthorUpdateDTO(authorUpdate));
+      const updatedAuthor = await this.authorService.updateAuthor(
+        id,
+        new AuthorUpdateDTO(validationResultAuthorUpdate.value),
+      );
       return AuthorDTO.toDTO(updatedAuthor, req);
     } catch (error) {
       errorHandler(error, res);
